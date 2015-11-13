@@ -30,29 +30,44 @@ function updateIcon (status, tabId) {
     });
 }
 
-function reviewIssue(data) {
-    if (data.startsWith(')]}\'')) {
-        data = data.substr(4);
+function reviewIssue (revision) {
+    console.log(revision);
+    var responseText = this.responseText;
+    if (responseText.startsWith(')]}\'')) {
+        responseText = responseText.substr(4);
     }
 
-    console.log(JSON.parse(data));
+    var response = JSON.parse(responseText),
+        revisions,
+        cherryCommand;
+
+    if (revision === 'latest') {
+        revision = response[0].revisions.length;
+    }
+    revisions = Object.keys(response[0].revisions).map(function (key) {return response[0].revisions[key]});
+    revisions.forEach(function (currentRevision) {
+        if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
+            cherryCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
+        }
+    });
+}
+
+function xhrSuccess () {
+    this.callback.apply(this, this.arguments);
 }
 
 function xhrError () {
     console.log('doh!');
 }
 
-function loadIssueDetails (url, callBack) {
+function loadIssueDetails (url, callBack, revision) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
+    xhr.arguments = Array.prototype.slice.call(arguments, 2);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(null);
     xhr.callback = callBack;
-    xhr.onload = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            reviewIssue(xhr.responseText);
-        }
-    };
+    xhr.onload = xhrSuccess;
     xhr.onerror = xhrError;
 }
 
@@ -63,7 +78,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         return;
     }
 
-    // Prep some variables
+    // Prepare some variables
     var gerritUrl = 'https://review.typo3.org/';
 
     // Check if localStorage is available and get the settings out of it
@@ -81,39 +96,52 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         var parser = document.createElement('a');
         parser.href = tab.url;
         if (parser.hash.startsWith('#/c/')) {
-            updateIcon(1, tabId);
 
-            var issueNumber, issueParts, url;
+            var issueNumber, hashParts;
 
-            if (parser.hash.endsWith('/')) {
-                issueParts = parser.hash.slice(0, -1);
+            hashParts = parser.hash.split('/');
+
+            if (hashParts.length === 4) {
+                hashParts.pop();
+                issueNumber = hashParts.pop();
+            } else if (hashParts.length === 3) {
+                issueNumber = hashParts.pop();
             }
 
-            issueNumber = issueParts.split('/').pop();
-
-            // https://review.typo3.org/changes/44704/detail?O=2002
-            url = parser.protocol + '//' + parser.hostname + '/changes/' + issueNumber + '/detail?O=2002';
-
-            loadIssueDetails(url, reviewIssue);
+            if (issueNumber !== undefined) {
+                updateIcon(1, tabId);
+            }
         } else {
             updateIcon(0, tabId);
         }
     }
 });
 
-// Request the current status and update the icon accordingly
+// Fetch the revisions
 chrome.pageAction.onClicked.addListener(function (tab) {
-    chrome.tabs.sendMessage(
-        tab.id,
-        {
-            cmd: 'reviewTYPO3Patch'
-        },
-        function (response) {
-            if (response.status !== undefined) {
-                var bkg = chrome.extension.getBackgroundPage();
-                bkg.console.log(response);
-                bkg.console.log(tab.url);
+    var parser = document.createElement('a');
+    parser.href = tab.url;
+    if (parser.hash.startsWith('#/c/')) {
+
+        var issueNumber, hashParts, revision, url;
+
+        hashParts = parser.hash.split('/');
+
+        if (hashParts.length === 4) {
+            revision = hashParts.pop();
+            if (revision === '') {
+                revision = 'latest';
             }
+            issueNumber = hashParts.pop();
+        } else if (hashParts.length === 3) {
+            revision = 'latest';
+            issueNumber = hashParts.pop();
         }
-    );
+
+        if (issueNumber !== undefined && revision !== undefined) {
+            // https://review.typo3.org/changes/?q=change:36674&o=ALL_REVISIONS&o=DOWNLOAD_COMMANDS
+            url = parser.protocol + '//' + parser.hostname + '/changes/?q=change:' + issueNumber + '&o=ALL_REVISIONS&o=DOWNLOAD_COMMANDS';
+            loadIssueDetails(url, reviewIssue, revision);
+        }
+    }
 });
