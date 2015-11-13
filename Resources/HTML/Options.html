@@ -1,0 +1,43 @@
+<html>
+<head>
+	<title i18n-content="optionsPageTitle">TYPO3 Review Options</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="/Resources/CSS/chrome_shared.css"/>
+	<link rel="stylesheet" href="/Resources/CSS/uber_frame.css"/>
+	<link rel="stylesheet" href="/Resources/CSS/Options.css"/>
+</head>
+<body class="uber-frame" style="font-family: 'Lucida Grande', sans-serif; font-size: 75%;">
+<div id="navigation">
+	<h1 i18n-content="extensionName">TYPO3 Review</h1>
+	<ul>
+		<li>
+			<a href="Options.html" class="active"><span i18n-content="optionsDisplayName">Options</span></a>
+		</li>
+		<li>
+			<a href="About.html"><span i18n-content="aboutDisplayName">About</span></a>
+		</li>
+	</ul>
+</div>
+<div class="page">
+	<header>
+		<h1 i18n-content="optionsTitle">Options</h1>
+	</header>
+	<section>
+		<p>
+			Review a TYPO3 patch by clicking the TYPO3 icon in the addressbar:
+			<img class="inlineicon" alt="" src="/Resources/Icons/ToolbarIcon19.png"/>
+		</p>
+
+		<h3>TYPO3 Review server (Gerrit) URL</h3>
+
+		<p class="note">Specify your TYPO3 Review server URL here.</p>
+
+		<p>
+			<input type="text" id="gerritUrl" value="https://review.typo3.org/" size="20"/>
+		</p>
+	</section>
+</div>
+<script type="text/javascript" src="/Resources/JavaScript/jquery-2.0.0.min.js"></script>
+<script type="text/javascript" src="/Resources/JavaScript/Options.js"></script>
+</body>
+</html>

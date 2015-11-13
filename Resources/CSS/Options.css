@@ -1,0 +1,121 @@
+#navigation {
+	height: 100%;
+	left: 0;
+	margin-top: -20px;
+	position: absolute;
+	right: 15px;
+	width: 155px;
+	z-index: 3;
+}
+
+/* Copyright (c) 2012 The Chromium Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file. */
+
+body {
+  overflow: auto;
+  padding-top: 20px;
+}
+
+html.changing-content body {
+  -webkit-transition: -webkit-transform 100ms;
+}
+
+h1 {
+  -webkit-margin-after: 1em;
+  /* This value must match the top padding of the uber page header. */
+  -webkit-margin-before: 21px;
+  -webkit-margin-start: 23px;
+  color: rgb(92, 97, 102);
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li:hover {
+  color: #777;
+}
+
+#navigation a.active {
+  -webkit-border-start-color: rgb(78, 87, 100);
+  cursor: default;
+}
+
+#helpNavItem {
+  margin-top: 27px;
+}
+
+#navigation li {
+	line-height: 17px;
+	margin: 6px 0;
+	padding: 0;
+}
+#navigation a {
+	display: block;
+	background-color: white;
+	color: #999;
+	cursor: pointer;
+	font: inherit;
+	line-height: 17px;
+	padding: 6px 0;
+	-webkit-border-start: 6px solid transparent;
+	-webkit-padding-start: 18px;
+	-webkit-user-select: none;
+	cursor: pointer;
+}
+button {
+	background-color: white;
+	border: 0;
+	color: #999;
+	cursor: pointer;
+	font: inherit;
+	line-height: 17px;
+	margin: 6px 0;
+	padding: 0;
+}
+#navigation a {
+	color: #999;
+	text-decoration: none;
+}
+
+#navigation a.active,
+.active > button {
+	color: rgb(70, 78, 90);
+}
+.aboutImage {
+	background-color:rgba(221, 221, 221, 0.95);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#888), to(#aaa));
+	background-image: -webkit-linear-gradient(#888, #aaa);
+	background-image: linear-gradient(#888, #aaa), linear-gradient(#888, #aaa);
+	background-size: 2px 100%;
+	background-position: 0 0, 100% 0;
+	background-repeat: no-repeat;
+	border-top: 1px solid #888;
+	box-shadow: 1px 4px 13px rgb(100, 100, 100);
+	border-radius: 2px;
+}
+.aboutImage img {
+	margin: 0 1px;
+}
+.aboutImage.right {
+	float: right;
+	clear: right;
+	margin: 0 0 15px 15px;
+}
+.aboutImage.left {
+	float: left;
+	clear: left;
+	margin: 15px 15px 0 0;
+}
+ul.features li:before {
+	color: #00aa00;
+	content: '\2714'; /* ✔ */
+	display: inline-block;
+	font-size: 13px;
+	width: 20px;
+}
+ul.features li {
+	margin: 6px 0;
+}

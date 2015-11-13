@@ -1,0 +1,151 @@
+{
+    "extensionDescription": {
+        "description": "The description of the extension",
+        "message": "TYPO3 Review vereenvoudigt het reviewen van TYPO3 patches."
+    },
+    "extensionName": {
+        "description": "The name of the extension",
+        "message": "TYPO3 Review"
+    },
+    "optionsDisplayName": {
+        "description": "Menu title for options.",
+        "message": "Opties"
+    },
+    "aboutDisplayName": {
+        "description": "Menu title for about.",
+        "message": "Over"
+    },
+    "helpDisplayName": {
+        "description": "Menu title for help.",
+        "message": "Help"
+    },
+    "optionsPageTitle": {
+        "description": "Title of HTTPSpy's options page.",
+        "message": "TYPO3 Review Opties"
+    },
+    "aboutTitle": {
+        "description": "Title of About view",
+        "message": "Over TYPO3 Review"
+    },
+    "helpTitle": {
+        "description": "Title of Help view",
+        "message": "Help"
+    },
+    "optionsTitle": {
+        "description": "Title of Options view",
+        "message": "Opties"
+    },
+    "optionsSectionTitleDisplayOptions": {
+        "description": "Section title of Display Options",
+        "message": "Weergave opties"
+    },
+    "optionsShowHeaderInformation": {
+        "description": "___Show header information___ in the [screen position]",
+        "message": "Toon header informatie"
+    },
+    "optionsInThe": {
+        "description": "Show header information _in the_ [screen position]",
+        "message": ""
+    },
+    "optionsIn": {
+        "description": "Show header information _in the_ [screen position]",
+        "message": "in"
+    },
+    "optionsMode": {
+        "description": "Show header information in [render mode] in the [screen position]",
+        "message": "weergave"
+    },
+    "optionsCornerFor": {
+        "description": "Show header information in the [screen position] ___corner for___ [seconds] seconds.",
+        "message": "en verberg na"
+    },
+    "optionsSeconds": {
+        "description": "Show header information in the [screen position] corner for [seconds] ___seconds___.",
+        "message": "seconden"
+    },
+    "optionsUseThe": {
+        "description": "___Use the___ [theme] theme.",
+        "message": "Gebruik een"
+    },
+    "optionsColorTheme": {
+        "description": "Use the [theme] ___theme___.",
+        "message": "kleurenschema"
+    },
+    "optionsSectionContentAboutHTTPSpy": {
+        "description": "Section of text describing TYPO3 Review",
+        "message": "TYPO3 Review maakt het mogelijk om de request en response headers te inspecteren direct nadat een pagina geladen is. De headers verschijnen in een venster bovenop de geladen pagina en verdwijnen naar een ingestelde tijd. Er is een normale weergave die alle header informatie toont en een micro weergave die alleen de opgegeven response headers toont."
+
+    },
+    "optionsSectionContentAboutMe" : {
+        "description": "Section of text describing Me",
+        "message": "Mijn naam is Michiel Roos. Ik vond het leuk om TYPO3 Review te ontwikkelen. Ik heb er een boel van geleerd. Ik hoop dat je hem nuttig vind en hem gebruikt met plezier. Als je suggesties of opbouwende kritiek hebt, neem dan contact met me op. Als je blij bent met TYPO3 Review, zou je dan een willekeurig bedrag willen doneren?"
+    },
+    "optionsSectionTitleFeatures": {
+        "description": "Section title of Features",
+        "message": "Features"
+    },
+    "optionsSectionTitleAboutMe": {
+        "description": "Section title of About Me",
+        "message": "Over Mij"
+    },
+    "optionsSectionTitleWhatDoesItDo": {
+        "description": "Section title of What does it do?",
+        "message": "Wat doet het?"
+    },
+    "optionsSectionTitleFilters": {
+        "description": "Section title of Filters",
+        "message": "Filters"
+    },
+    "optionsLabelHideRequestHeaders": {
+        "description": "Label for hide request headers input field",
+        "message": "Verberg request headers"
+    },
+    "optionsLabelHideResponseHeaders": {
+        "description": "Label for hide response headers input field",
+        "message": "Verberg response headers"
+    },
+    "optionsLabelShowResponseHeaders": {
+        "description": "Label for show response headers (in micro mode) input field",
+        "message": "Toon response headers (voor micro weergave)"
+    },
+    "optionsLabelShowResults": {
+        "description": "Label for show results input field",
+        "message": "Toon resultaten"
+    },
+    "topLeft": {
+        "description": "Position: top left",
+        "message": "Links Bovenin"
+    },
+    "topRight": {
+        "description": "Position: top right",
+        "message": "Rechts Bovenin"
+    },
+    "bottomLeft": {
+        "description": "Position: bottom left",
+        "message": "Links Onderin"
+    },
+    "bottomRight": {
+        "description": "Position: bottom right",
+        "message": "Rechts Onderin"
+    },
+    "darkTheme": {
+        "description": "Theme: dark",
+        "message": "donker"
+    },
+    "lightTheme": {
+        "description": "Theme: light",
+        "message": "licht"
+    },
+    "micro": {
+        "description": "Render mode: micro",
+        "message": "micro"
+    },
+    "normal": {
+        "description": "Render mode: normal",
+        "message": "normale"
+    },
+    "popupDefaultMessage": {
+        "description": "The default message shown in the browserAction popup",
+        "message": "Er zijn nog geen headers ontvangen. Ververs deze tab om de headers te zien."
+    }
+}
