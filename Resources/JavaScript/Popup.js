@@ -117,10 +117,10 @@ var TYPO3Review = (function () {
             allRevisionButtons = '';
 
         if (revision === 'latest' || '') {
-            revision = objectLength(response[0].revisions) + 1;
+            revision = objectLength(response[0].revisions);
         }
         revisions = Object.keys(response[0].revisions).map(function (key) {
-            return response[0].revisions[key]
+            return response[0].revisions[key];
         });
         revisions.forEach(function (currentRevision) {
             if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
