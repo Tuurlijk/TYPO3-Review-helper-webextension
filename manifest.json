@@ -23,11 +23,5 @@
         "48": "Resources/Icons/Icon48.png",
         "128": "Resources/Icons/Icon128.png"
     },
-    "options_page": "Resources/HTML/Options.html",
-    "content_scripts": [
-        {
-            "js": [ "Resources/JavaScript/Content.js" ],
-            "matches": [ "*://*/*" ]
-        }
-    ]
+    "options_page": "Resources/HTML/Options.html"
 }

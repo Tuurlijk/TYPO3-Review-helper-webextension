@@ -6,17 +6,16 @@
 jQuery(document).ready(function ($) {
     'use strict';
 
-    function restore_options() {
+    function restore_options () {
         var gerritUrl = localStorage.gerritUrl;
 
         if (!gerritUrl) {
-            gerritUrl = 'http://example.com/exampleuser';
+            gerritUrl = 'https://review.typo3.org/';
         }
         $('#gerritUrl').val(gerritUrl);
-
     }
 
-    function save_options() {
+    function save_options () {
         localStorage.gerritUrl = $('#gerritUrl').val();
     }
 

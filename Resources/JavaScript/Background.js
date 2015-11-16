@@ -4,6 +4,16 @@
 /*global chrome, document, localStorage, safari, SAFARI, openTab, DS, localize */
 'use strict';
 
+function objectLength (object) {
+    var length = 0;
+    for (var key in object) {
+        if (object.hasOwnProperty(key)) {
+            ++length;
+        }
+    }
+    return length;
+};
+
 function updateIcon (status, tabId) {
     // Figure the correct title/image with the given state
     var title = 'Please navigate to an issue',
@@ -31,7 +41,6 @@ function updateIcon (status, tabId) {
 }
 
 function reviewIssue (revision) {
-    console.log(revision);
     var responseText = this.responseText;
     if (responseText.startsWith(')]}\'')) {
         responseText = responseText.substr(4);
@@ -39,25 +48,74 @@ function reviewIssue (revision) {
 
     var response = JSON.parse(responseText),
         revisions,
-        cherryCommand;
+        cherryPickCommand = '';
 
     if (revision === 'latest') {
-        revision = response[0].revisions.length;
+        revision = objectLength(response[0].revisions);
     }
     revisions = Object.keys(response[0].revisions).map(function (key) {return response[0].revisions[key]});
     revisions.forEach(function (currentRevision) {
         if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
-            cherryCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
+            cherryPickCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
         }
     });
+    if (cherryPickCommand !== '') {
+        ifReviewSiteIsAvailable(runCherryPickCommand, cherryPickCommand);
+    } else {
+        alert('doh! No cherry pick command found.');
+    }
+}
+
+function ifReviewSiteIsAvailable(callBack, cherryPickCommand) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', 'http://local.typo3.org/review.php', true);
+    xhr.arguments = Array.prototype.slice.call(arguments, 2);
+    xhr.send(null);
+    xhr.onerror = xhrError;
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                runCherryPickCommand(openTabs, cherryPickCommand);
+            } else {
+                xhrError('Review server not available. Please follow instructions over at https://github.com/Tuurlijk/TYPO3.Review');
+            }
+        }
+    };
+}
+
+function runCherryPickCommand(callBack, cherryPickCommand) {
+    var xhr = new XMLHttpRequest(),
+        parameters = "parameter=" + encodeURIComponent(cherryPickCommand) + "&cmd=review";
+    xhr.open('POST', 'http://local.typo3.org/review.php', true);
+    xhr.arguments = Array.prototype.slice.call(arguments, 2);
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhr.send(parameters);
+    xhr.onerror = xhrError;
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                openTabs(cherryPickCommand);
+            } else {
+                xhrError('Failed to run the cherry pick command');
+            }
+        }
+    };
+}
+
+function openTabs() {
+    alert('Change was cherryPicked, please go to http://review.local.typo3.org/typo3/');
 }
 
 function xhrSuccess () {
     this.callback.apply(this, this.arguments);
 }
 
-function xhrError () {
-    console.log('doh!');
+function xhrError (message) {
+    if (message === undefined) {
+        message = 'Doh!';
+    }
+    alert(message);
+    console.log(message);
 }
 
 function loadIssueDetails (url, callBack, revision) {
