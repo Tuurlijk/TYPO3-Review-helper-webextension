@@ -116,7 +116,7 @@ var TYPO3Review = (function () {
             cherryPickCommand = '',
             allRevisionButtons = '';
 
-        if (revision === 'latest') {
+        if (revision === 'latest' || '') {
             revision = objectLength(response[0].revisions);
         }
         revisions = Object.keys(response[0].revisions).map(function (key) {
@@ -126,8 +126,7 @@ var TYPO3Review = (function () {
             if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
                 cherryPickCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
                 if (cherryPickCommand !== '') {
-                    document.getElementById('result').innerText = '';
-                    document.getElementById('currentRevision').innerHTML = '<input id="currentRevision" class="revisionButton" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
+                    document.getElementById('currentRevision').innerHTML = '<input class="revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
                 } else {
                     alert('doh! No cherry pick command found.');
                 }
@@ -139,7 +138,7 @@ var TYPO3Review = (function () {
             if (parseInt(currentRevision._number, 10) !== parseInt(revision, 10)) {
                 cherryPickCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
                 if (cherryPickCommand !== '') {
-                    allRevisionButtons += '<input type="button" class="revisionButton" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '">';
+                    allRevisionButtons += '<input type="button" class="revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '">';
                 } else {
                     alert('doh! No cherry pick command found.');
                 }
@@ -216,7 +215,7 @@ var TYPO3Review = (function () {
                     hashParts.shift();
                     issueNumber = hashParts.shift();
 
-                    if (hashParts.length) {
+                    if (hashParts.length > 1) {
                         revision = hashParts.shift();
                     }
                 }
