@@ -16,7 +16,8 @@
             "19": "Resources/Icons/ToolbarIcon19.png",
             "38": "Resources/Icons/ToolbarIcon38.png"
         },
-        "default_title": "TYPO3 Review disabled"
+        "default_title": "TYPO3 Review disabled",
+        "default_popup": "Resources/HTML/Popup.html"
     },
     "icons": {
         "16": "Resources/Icons/Icon16.png",

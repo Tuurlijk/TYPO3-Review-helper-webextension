@@ -27,6 +27,30 @@
         "description": "Title of About view",
         "message": "Over TYPO3 Review"
     },
+    "changeIdNotFound": {
+        "description": "Message shown in address bar popup if change id was not found",
+        "message": "No change id could be found. Please navigate to a valid issue."
+    },
+    "loading": {
+        "description": "Message shown in address bar popup when loading details",
+        "message": "Loading . . ."
+    },
+    "reviewSiteUnavailable": {
+        "description": "Message shown in address bar popup when review site is unavailable",
+        "message": "Review site http://review.local.typo3.org is unavailable. Please start the review box or head over to github for installation instructions"
+    },
+    "resetSitesSuccess": {
+        "description": "Message shown in address bar popup when review site was reset",
+        "message": "Review sites have been reset"
+    },
+    "updateSitesSuccess": {
+        "description": "Message shown in address bar popup when review site was updated",
+        "message": "Review sites have been updated"
+    },
+    "cherryPickSuccess": {
+        "description": "Message shown in address bar popup when cherry-pick was successful",
+        "message": "Cherry-Pick was successful"
+    },
     "helpTitle": {
         "description": "Title of Help view",
         "message": "Help"

@@ -1,0 +1,215 @@
+body {
+	color: rgb(100, 100, 100);
+	font: 11px 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	overflow: auto;
+	min-width: 200px;
+}
+
+/*
+ * Remove blue outline that Chrome makes when autoselecting the first link
+ */
+*:focus {
+	outline: none;
+}
+
+table {
+	margin-left: -4px;
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 500px;
+}
+
+/*
+ * Shadows are visible under slightly transparent text color
+ */
+h1 {
+	color: rgba(100, 100, 100, 0.80);
+	font-size: 12px;
+	font-weight: bold;
+	margin-bottom: 4px;
+	text-align: right;
+	text-shadow: 1px 1px 1px white, 0 0 0 black, 1px 1px 1px white;
+	white-space: nowrap;
+}
+
+/*
+ * Don't show shadows when selecting text
+ */
+td::selection {
+	text-shadow: none;
+	color: #f7f7f7;
+	background-color: #ff9640;
+}
+
+.separator {
+	border-top: 1px solid #dcdcdc;
+	margin: 4px -8px;
+}
+
+.httpSpyInfoBox .url {
+	font-weight: bold;
+}
+
+table,
+td,
+td:hover,
+tr,
+tr:hover {
+	background: transparent none;
+	border: 0;
+	color: rgb(50, 50, 50);
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	text-shadow: none;
+	text-transform: none;
+	vertical-align: top;
+	visibility: visible;
+	white-space: nowrap;
+}
+
+td,
+td:hover {
+	padding: 1px 4px 1px 0;
+	max-width: 400px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow-x: hidden;
+}
+
+.sectionTitle,
+.key {
+	color: rgb(100, 100, 100);
+}
+
+.sectionTitle {
+	padding-bottom: 4px;
+	cursor: pointer;
+	-webkit-user-select: none;
+}
+
+.key:hover {
+	color: rgb(50, 50, 50);
+}
+
+.value {
+	width: 80%;
+}
+
+.sectionTitle,
+.url {
+	font-weight: bold;
+	max-width: 500px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow-x: hidden;
+	position: relative;
+	z-index: 1;
+	padding: 2px 0 3px 0;
+}
+
+.sectionTitle:hover,
+.url a:hover {
+	color: rgb(100, 100, 100);
+	text-decoration: underline;
+}
+
+.url a,
+.sectionTitle {
+	color: rgb(50, 50, 50);
+	text-decoration: none;
+}
+
+.closed {
+	height: 0;
+	opacity: 0;
+	position: relative;
+	z-index: 0;
+}
+
+.opened {
+	height: auto;
+	-webkit-transition: opacity 0.3s ease-in;
+	transition: opacity 0.3s ease-in;
+	opacity: 1;
+	position: relative;
+	z-index: 1;
+}
+
+.closeArrow:before {
+	color: rgb(150, 150, 150);
+	content: '\25bc'; /* ▼ */
+	font-size: 9px;
+	width: 15px;
+	display: inline-block;
+}
+
+.openArrow:before {
+	color: rgb(150, 150, 150);
+	content: '\25b6'; /* ▶ */
+	font-size: 9px;
+	width: 15px;
+	display: inline-block;
+}
+
+.status2xx:before {
+	color: #00aa00;
+	content: '\2714'; /* ✔ */
+	display: inline-block;
+	font-size: 13px;
+	width: 15px;
+}
+
+.status3xx:before {
+	color: #ff7800;
+	content: '\279c'; /* ➜ */
+	display: inline-block;
+	font-size: 13px;
+	width: 15px;
+}
+
+.status4xx:before {
+	color: #c60000;
+	content: '\2716'; /* ✖ */
+	display: inline-block;
+	font-size: 13px;
+	width: 15px;
+}
+
+.status5xx:before {
+	color: #c60000;
+	content: '\2716'; /* ✖ */
+	display: inline-block;
+	font-size: 13px;
+	width: 15px;
+}
+
+.donateButton {
+	position: absolute;
+	top: 2px;
+}
+
+.throbber {
+	position: relative;
+	top: 48%;
+	left: 48%;
+	background: url('../Images/throbber.svg');
+	display: inline-block;
+	height: 16px;
+	width: 16px;
+}
+
+.hide {
+	display: none;
+}
+
+.loading {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: rgba(251, 251, 251, 0.9);
+	align: center;
+	vertical-align: middle;
+}
