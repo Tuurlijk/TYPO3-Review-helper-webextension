@@ -117,7 +117,7 @@ var TYPO3Review = (function () {
             allRevisionButtons = '';
 
         if (revision === 'latest' || '') {
-            revision = objectLength(response[0].revisions);
+            revision = objectLength(response[0].revisions) + 1;
         }
         revisions = Object.keys(response[0].revisions).map(function (key) {
             return response[0].revisions[key]
@@ -219,6 +219,9 @@ var TYPO3Review = (function () {
                         revision = hashParts.shift();
                     }
                 }
+            }
+            if (revision === '') {
+                revision = 'latest';
             }
             return revision;
         },
