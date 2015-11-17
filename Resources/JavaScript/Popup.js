@@ -1,15 +1,23 @@
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, globalstrict: true,
  latedef:true, noarg:true, noempty:true, nonew:true, undef:true, maxlen:256,
  strict:true, trailing:true, boss:true, browser:true, devel:true, jquery:true */
-/*global chrome, safari, SAFARI, openTab, Ember, DS, localize */
+/*jslint plusplus:true, nomen:true, browser:true*/
+/*global chrome, safari, SAFARI, openTab, Ember, DS, console, alert */
 /*global isValidUrl, sanitizeString */
-'use strict';
 
 var TYPO3Review = (function () {
+    'use strict';
 
-    function objectLength (object) {
-        var length = 0;
-        for (var key in object) {
+    /**
+     * Gen the number of objects within an object
+     *
+     * @param object
+     * @returns {number}
+     */
+    function objectLength(object) {
+        var length = 0,
+            key;
+        for (key in object) {
             if (object.hasOwnProperty(key)) {
                 ++length;
             }
@@ -24,7 +32,7 @@ var TYPO3Review = (function () {
      * @param {object} b  Object b.
      * @return {*}  Not defined.
      */
-    function sortObjectArrayByRevision (a, b) {
+    function sortObjectArrayByRevision(a, b) {
         if (a._number > b._number) {
             return -1;
         }
@@ -34,11 +42,33 @@ var TYPO3Review = (function () {
         return 0;
     }
 
+    function xhrError(message) {
+        if (message === undefined) {
+            message = 'Doh!';
+        }
+        console.log(message);
+    }
+
+    /**
+     * Get the cherry-pick command from the revision data
+     * @param currentRevision
+     * @returns {string}
+     */
+    function getCherryPickCommand(currentRevision) {
+        var cherryPickCommand = '';
+        if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
+            cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
+            document.getElementById('loading').className = 'loading';
+            runCherryPickCommand(cherryPickCommand);
+        }
+        return cherryPickCommand;
+    }
+
     /**
      * Reset and update are also possible cmd values
      * @param cherryPickCommand
      */
-    function runCherryPickCommand (cherryPickCommand) {
+    function runCherryPickCommand(cherryPickCommand) {
         var xhr = new XMLHttpRequest(),
             parameters = "parameter=" + encodeURIComponent(cherryPickCommand) + "&cmd=review";
         xhr.open('POST', 'http://local.typo3.org/review.php', true);
@@ -61,7 +91,7 @@ var TYPO3Review = (function () {
     /**
      * Reset review sites
      */
-    function resetReviewSites () {
+    function resetReviewSites() {
         document.getElementById('loading').className = 'loading';
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=reset";
@@ -85,7 +115,7 @@ var TYPO3Review = (function () {
     /**
      * Update review sites
      */
-    function updateReviewSites () {
+    function updateReviewSites() {
         document.getElementById('loading').className = 'loading';
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=update";
@@ -106,15 +136,20 @@ var TYPO3Review = (function () {
         };
     }
 
-    function reviewIssue (responseText, revision) {
+    function reviewIssue(responseText, revision) {
         if (responseText.startsWith(')]}\'')) {
             responseText = responseText.substr(4);
         }
 
         var response = JSON.parse(responseText),
             revisions,
+            allRevisions,
             cherryPickCommand = '',
-            allRevisionButtons = '';
+            allRevisionButtons = '',
+            m,
+            n,
+            resetButton,
+            updateButton;
 
         if (revision === 'latest' || '') {
             revision = objectLength(response[0].revisions);
@@ -124,7 +159,7 @@ var TYPO3Review = (function () {
         });
         revisions.forEach(function (currentRevision) {
             if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
-                cherryPickCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
+                cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                 if (cherryPickCommand !== '') {
                     document.getElementById('currentRevision').innerHTML = '<input class="revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
                 } else {
@@ -136,7 +171,7 @@ var TYPO3Review = (function () {
 
         revisions.forEach(function (currentRevision) {
             if (parseInt(currentRevision._number, 10) !== parseInt(revision, 10)) {
-                cherryPickCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
+                cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                 if (cherryPickCommand !== '') {
                     allRevisionButtons += '<input type="button" class="revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '">';
                 } else {
@@ -145,29 +180,22 @@ var TYPO3Review = (function () {
             }
         });
         document.getElementById('allRevisions').innerHTML = allRevisionButtons;
-        var allRevisions = document.getElementsByClassName('revisionButton');
-        for (var m = 0, n = allRevisions.length; m < n; ++m) {
+        allRevisions = document.getElementsByClassName('revisionButton');
+        for (m = 0, n = allRevisions.length; m < n; ++m) {
             allRevisions[m].addEventListener('click', function (event) {
                 revisions.forEach(function (currentRevision) {
                     if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
-                        cherryPickCommand = currentRevision.fetch['anonymous http']['commands']['Cherry Pick'];
+                        cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                         document.getElementById('loading').className = 'loading';
                         runCherryPickCommand(cherryPickCommand);
                     }
                 });
             }, false);
         }
-        var resetButton = document.getElementById('resetButton');
+        resetButton = document.getElementById('resetButton');
         resetButton.addEventListener('click', resetReviewSites, false);
-        var updateButton = document.getElementById('updateButton');
+        updateButton = document.getElementById('updateButton');
         updateButton.addEventListener('click', updateReviewSites, false);
-    }
-
-    function xhrError (message) {
-        if (message === undefined) {
-            message = 'Doh!';
-        }
-        console.log(message);
     }
 
     // Public methods
@@ -203,7 +231,6 @@ var TYPO3Review = (function () {
 
         getRevision: function (tabs) {
             var parser = document.createElement('a'),
-                issueNumber,
                 hashParts,
                 revision = 'latest';
             parser.href = tabs[0].url;
@@ -213,7 +240,7 @@ var TYPO3Review = (function () {
                 if (hashParts.length > 2) {
                     hashParts.shift();
                     hashParts.shift();
-                    issueNumber = hashParts.shift();
+                    hashParts.shift();
 
                     if (hashParts.length > 1) {
                         revision = hashParts.shift();
@@ -235,7 +262,7 @@ var TYPO3Review = (function () {
             xhr.ontimeout = function () {
                 document.getElementById('status').innerHTML = chrome.i18n.getMessage('reviewSiteUnavailable') + ": <a href='https://github.com/Tuurlijk/TYPO3.Review' target='github'>https://github.com/Tuurlijk/TYPO3.Review</a>.";
                 document.getElementById('status').setAttribute('class', 'status4xx');
-            }
+            };
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 400) {
@@ -258,7 +285,7 @@ var TYPO3Review = (function () {
                         document.getElementById('status').setAttribute('class', 'hide');
                     }
                 }
-            }
+            };
             xhr.onerror = xhrError;
         }
 
@@ -266,6 +293,7 @@ var TYPO3Review = (function () {
 })();
 
 document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
     document.getElementById('extensionName').innerText = chrome.i18n.getMessage('extensionName');
     document.getElementById('status').innerText = chrome.i18n.getMessage('popupDefaultMessage');
 
