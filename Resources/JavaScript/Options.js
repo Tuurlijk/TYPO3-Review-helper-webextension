@@ -10,8 +10,13 @@ jQuery(document).ready(function ($) {
      * Restore Options
      */
     function restore_options() {
-        var gerritUrl = localStorage.gerritUrl;
+        var forgerUrl = localStorage.forgerUrl,
+            gerritUrl = localStorage.gerritUrl;
 
+        if (!forgerUrl) {
+            forgerUrl = 'https://forger.typo3.org/';
+        }
+        $('#forgerUrl').val(forgerUrl);
         if (!gerritUrl) {
             gerritUrl = 'https://review.typo3.org/';
         }
@@ -22,9 +27,13 @@ jQuery(document).ready(function ($) {
      * Save Options
      */
     function save_options() {
+        localStorage.forgerUrl = $('#forgerUrl').val();
         localStorage.gerritUrl = $('#gerritUrl').val();
     }
 
+    $('#forgerUrl').keyup(function () {
+        save_options();
+    });
     $('#gerritUrl').keyup(function () {
         save_options();
     });
