@@ -6,7 +6,10 @@
 jQuery(document).ready(function ($) {
     'use strict';
 
-    function restore_options () {
+    /**
+     * Restore Options
+     */
+    function restore_options() {
         var gerritUrl = localStorage.gerritUrl;
 
         if (!gerritUrl) {
@@ -15,7 +18,10 @@ jQuery(document).ready(function ($) {
         $('#gerritUrl').val(gerritUrl);
     }
 
-    function save_options () {
+    /**
+     * Save Options
+     */
+    function save_options() {
         localStorage.gerritUrl = $('#gerritUrl').val();
     }
 

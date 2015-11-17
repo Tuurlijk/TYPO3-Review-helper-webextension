@@ -42,6 +42,11 @@ var TYPO3Review = (function () {
         return 0;
     }
 
+    /**
+     * Display error message
+     *
+     * @param message
+     */
     function xhrError(message) {
         if (message === undefined) {
             message = 'Doh!';
@@ -136,7 +141,13 @@ var TYPO3Review = (function () {
         };
     }
 
-    function reviewIssue(responseText, revision) {
+    /**
+     * Create review buttons
+     *
+     * @param responseText
+     * @param revision
+     */
+    function createReviewButtons(responseText, revision) {
         if (responseText.startsWith(')]}\'')) {
             responseText = responseText.substr(4);
         }
@@ -201,6 +212,12 @@ var TYPO3Review = (function () {
     // Public methods
     return {
 
+        /**
+         * Get the change detail url
+         *
+         * @param tabs
+         * @returns {string}
+         */
         getChangeDetailUrl: function (tabs) {
             var parser = document.createElement('a'),
                 issueNumber,
@@ -229,6 +246,12 @@ var TYPO3Review = (function () {
             return url;
         },
 
+        /**
+         * Get currently viewed revision
+         *
+         * @param tabs
+         * @returns {string}
+         */
         getRevision: function (tabs) {
             var parser = document.createElement('a'),
                 hashParts,
@@ -253,6 +276,9 @@ var TYPO3Review = (function () {
             return revision;
         },
 
+        /**
+         * Check if the review site is available
+         */
         checkReviewSiteAvailability: function () {
             var xhr = new XMLHttpRequest();
             xhr.open('HEAD', 'http://local.typo3.org/review.php', true);
@@ -273,6 +299,12 @@ var TYPO3Review = (function () {
             };
         },
 
+        /**
+         * Load the details for a certains issue
+         *
+         * @param url
+         * @param revision
+         */
         loadIssueDetails: function (url, revision) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
@@ -281,7 +313,7 @@ var TYPO3Review = (function () {
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        reviewIssue(xhr.responseText, revision);
+                        createReviewButtons(xhr.responseText, revision);
                         document.getElementById('status').setAttribute('class', 'hide');
                     }
                 }

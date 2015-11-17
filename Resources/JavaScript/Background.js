@@ -2,9 +2,15 @@
  latedef:true, noarg:true, noempty:true, nonew:true, undef:true, maxlen:256,
  strict:true, trailing:true, boss:true, browser:true, devel:true, jquery:true */
 /*global chrome, document, localStorage, safari, SAFARI, openTab, DS, localize */
-'use strict';
 
-function updateIcon (status, tabId) {
+/**
+ * Update the addressbar icon
+ *
+ * @param status
+ * @param tabId
+ */
+function updateIcon(status, tabId) {
+    'use strict';
     // Figure the correct title/image with the given state
     var title = 'Please navigate to an issue',
         image = 'ToolbarIconDisabled';
@@ -31,6 +37,8 @@ function updateIcon (status, tabId) {
 }
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+    'use strict';
+
     // We only react on a complete load of a http(s) page,
     // only then we're sure the content.js is loaded.
     if (changeInfo.status !== 'complete' || tab.url.indexOf('http') !== 0) {
@@ -38,7 +46,10 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     }
 
     // Prepare some variables
-    var gerritUrl = 'https://review.typo3.org/';
+    var gerritUrl = 'https://review.typo3.org/',
+        parser,
+        hashParts,
+        issueNumber;
 
     // Check if localStorage is available and get the settings out of it
     if (localStorage) {
@@ -52,9 +63,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         // Show the pageAction
         chrome.pageAction.show(tabId);
 
-        var parser = document.createElement('a'),
-            hashParts,
-            issueNumber;
+        parser = document.createElement('a');
         parser.href = tab.url;
         if (parser.hash.startsWith('#/c/')) {
             hashParts = parser.hash.split('/');
