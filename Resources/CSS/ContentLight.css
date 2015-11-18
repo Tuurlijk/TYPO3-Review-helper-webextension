@@ -273,13 +273,13 @@
 	background-image: -webkit-linear-gradient(#ededed, #FFD1A7 38%, #FF861A);
 }
 
-#TYPO3Review_1447791881 #currentRevision .button {
+#TYPO3Review_1447791881 #TYPO3Review_1447791881_currentRevision .button {
 	background-image: -webkit-linear-gradient(#ededed, #FFD1A7 38%, #FF861A);
 	margin-bottom: 4px;
 	margin-top: 4px;
 }
 
-#TYPO3Review_1447791881 #currentRevision .button:hover {
+#TYPO3Review_1447791881 #TYPO3Review_1447791881_currentRevision .button:hover {
 	background-image: -webkit-linear-gradient(#ededed, #ededed 38%, #dedede);
 }
 
