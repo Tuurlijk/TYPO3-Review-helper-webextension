@@ -7,6 +7,8 @@
 var TYPO3Review_1447791881 = (function () {
     'use strict';
 
+    var prefix = 'TYPO3Review_1447791881_';
+
     /**
      * Create popup element
      *
@@ -14,16 +16,17 @@ var TYPO3Review_1447791881 = (function () {
     function createPopupDiv() {
         var containerDiv = document.createElement('div');
         containerDiv.id = 'TYPO3Review_1447791881';
-        containerDiv.innerHTML = '<div class="normalMode"><div id="TYPO3Review_1447791881_status"></div>' +
-            '<div id="TYPO3Review_1447791881_loading" class="hide">' +
+        containerDiv.innerHTML = '<div class="normalMode"><div id="' + prefix + 'status"></div>' +
+            '<div id="' + prefix + 'loading" class="hide">' +
             '<div class="throbber"></div>' +
             '</div>' +
             '<div class="buttons">' +
-            '<div id="TYPO3Review_1447791881_currentRevision"></div>' +
-            '<div id="TYPO3Review_1447791881_allRevisions"></div>' +
+            '<div id="' + prefix + 'currentRevision"></div>' +
+            '<div id="' + prefix + 'allRevisions"></div>' +
             '<div class="separator"></div>' +
-            '<input id="TYPO3Review_1447791881_resetButton" class="button" type="button" name="cmd" value="Reset Review Sites">' +
-            '<input id="TYPO3Review_1447791881_updateButton" class="button" type="button" name="cmd" value="Update Review Sites">' +
+            '<input id="' + prefix + 'resetButton" class="button" type="button" name="cmd" value="Reset Review Sites">' +
+            '<br/>' +
+            '<input id="' + prefix + 'updateButton" class="button" type="button" name="cmd" value="Update Review Sites">' +
             '</div></div>';
 
         if (document.getElementsByTagName('body')[0]) {
@@ -94,9 +97,9 @@ var TYPO3Review_1447791881 = (function () {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    document.getElementById('loading').className = 'hide';
-                    document.getElementById('status').innerHTML = chrome.i18n.getMessage('cherryPickSuccess');
-                    document.getElementById('status').setAttribute('class', 'status2xx');
+                    document.getElementById(prefix + 'loading').className = 'hide';
+                    document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('cherryPickSuccess');
+                    document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
                 } else {
                     xhrError('Failed to run the cherry pick command');
                 }
@@ -113,7 +116,7 @@ var TYPO3Review_1447791881 = (function () {
         var cherryPickCommand = '';
         if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
             cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
-            document.getElementById('loading').className = 'loading';
+            document.getElementById(prefix + 'loading').className = 'loading';
             runCherryPickCommand(cherryPickCommand);
         }
         return cherryPickCommand;
@@ -123,7 +126,7 @@ var TYPO3Review_1447791881 = (function () {
      * Reset review sites
      */
     function resetReviewSites() {
-        document.getElementById('loading').className = 'loading';
+        document.getElementById(prefix + 'loading').className = 'loading';
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=reset";
         xhr.open('POST', 'http://local.typo3.org/review.php', true);
@@ -133,9 +136,9 @@ var TYPO3Review_1447791881 = (function () {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    document.getElementById('loading').className = 'hide';
-                    document.getElementById('status').innerHTML = chrome.i18n.getMessage('resetSitesSuccess');
-                    document.getElementById('status').setAttribute('class', 'status2xx');
+                    document.getElementById(prefix + 'loading').className = 'hide';
+                    document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('resetSitesSuccess');
+                    document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
                 } else {
                     xhrError('Failed to reset the sites');
                 }
@@ -161,7 +164,7 @@ var TYPO3Review_1447791881 = (function () {
      * Update review sites
      */
     function updateReviewSites() {
-        document.getElementById('loading').className = 'loading';
+        document.getElementById(prefix + 'loading').className = 'loading';
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=update";
         xhr.open('POST', 'http://local.typo3.org/review.php', true);
@@ -171,9 +174,9 @@ var TYPO3Review_1447791881 = (function () {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    document.getElementById('loading').className = 'hide';
-                    document.getElementById('status').innerHTML = chrome.i18n.getMessage('updateSitesSuccess');
-                    document.getElementById('status').setAttribute('class', 'status2xx');
+                    document.getElementById(prefix + 'loading').className = 'hide';
+                    document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('updateSitesSuccess');
+                    document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
                 } else {
                     xhrError('Failed to update the sites');
                 }
@@ -212,7 +215,7 @@ var TYPO3Review_1447791881 = (function () {
             if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
                 cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                 if (cherryPickCommand !== '') {
-                    document.getElementById('currentRevision').innerHTML = '<input class="revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
+                    document.getElementById(prefix + 'currentRevision').innerHTML = '<input class="revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
                 } else {
                     alert('doh! No cherry pick command found.');
                 }
@@ -230,22 +233,22 @@ var TYPO3Review_1447791881 = (function () {
                 }
             }
         });
-        document.getElementById('allRevisions').innerHTML = allRevisionButtons;
-        allRevisions = document.getElementsByClassName('revisionButton');
+        document.getElementById(prefix + 'allRevisions').innerHTML = allRevisionButtons;
+        allRevisions = document.getElementsByClassName(prefix + 'revisionButton');
         for (m = 0, n = allRevisions.length; m < n; ++m) {
             allRevisions[m].addEventListener('click', function (event) {
                 revisions.forEach(function (currentRevision) {
                     if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
                         cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
-                        document.getElementById('loading').className = 'loading';
+                        document.getElementById(prefix + 'loading').className = 'loading';
                         runCherryPickCommand(cherryPickCommand);
                     }
                 });
             }, false);
         }
-        resetButton = document.getElementById('resetButton');
+        resetButton = document.getElementById(prefix + 'resetButton');
         resetButton.addEventListener('click', resetReviewSites, false);
-        updateButton = document.getElementById('updateButton');
+        updateButton = document.getElementById(prefix + 'updateButton');
         updateButton.addEventListener('click', updateReviewSites, false);
     }
 
@@ -283,6 +286,14 @@ var TYPO3Review_1447791881 = (function () {
                 }
             }
             return detailUrl;
+        },
+
+        /**
+         * Get the id prefix
+         * @returns {string}
+         */
+        getPrefix: function() {
+            return prefix;
         },
 
         /**
@@ -325,14 +336,14 @@ var TYPO3Review_1447791881 = (function () {
             xhr.onerror = xhrError;
             xhr.timeout = 1000;
             xhr.ontimeout = function () {
-                document.getElementById('status').innerHTML = chrome.i18n.getMessage('reviewSiteUnavailable') + ": <a href='https://github.com/Tuurlijk/TYPO3.Review' target='github'>https://github.com/Tuurlijk/TYPO3.Review</a>.";
-                document.getElementById('status').setAttribute('class', 'status4xx');
+                document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('reviewSiteUnavailable') + ": <a href='https://github.com/Tuurlijk/TYPO3.Review' target='github'>https://github.com/Tuurlijk/TYPO3.Review</a>.";
+                document.getElementById(prefix + 'status').setAttribute('class', 'status4xx');
             };
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 400) {
-                        document.getElementById('status').innerHTML = chrome.i18n.getMessage('reviewSiteUnavailable') + ": <a href='https://github.com/Tuurlijk/TYPO3.Review' target='github'>https://github.com/Tuurlijk/TYPO3.Review</a>.";
-                        document.getElementById('status').setAttribute('class', 'status4xx');
+                        document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('reviewSiteUnavailable') + ": <a href='https://github.com/Tuurlijk/TYPO3.Review' target='github'>https://github.com/Tuurlijk/TYPO3.Review</a>.";
+                        document.getElementById(prefix + 'status').setAttribute('class', 'status4xx');
                     }
                 }
             };
@@ -353,7 +364,7 @@ var TYPO3Review_1447791881 = (function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         createReviewButtons(xhr.responseText, revision);
-                        document.getElementById('status').setAttribute('class', 'hide');
+                        document.getElementById(prefix + 'status').setAttribute('class', 'hide');
                     }
                 }
             };

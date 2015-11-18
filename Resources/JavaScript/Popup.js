@@ -6,10 +6,12 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
-    document.getElementById('extensionName').innerText = chrome.i18n.getMessage('extensionName');
-    document.getElementById('status').innerText = chrome.i18n.getMessage('popupDefaultMessage');
+    var t3Review = TYPO3Review_1447791881,
+        prefix = t3Review.getPrefix();
 
-    var t3Review = TYPO3Review_1447791881;
+    document.getElementById(prefix + 'extensionName').innerText = chrome.i18n.getMessage('extensionName');
+    document.getElementById(prefix + 'status').innerText = chrome.i18n.getMessage('popupDefaultMessage');
+
     // Query for the active tab...
     chrome.tabs.query({
         active: true,
@@ -21,12 +23,12 @@ document.addEventListener('DOMContentLoaded', function () {
         t3Review.checkReviewSiteAvailability();
 
         if (url) {
-            document.getElementById('status').innerText = chrome.i18n.getMessage('loading');
-            document.getElementById('status').setAttribute('class', 'status2xx');
+            document.getElementById(prefix + 'status').innerText = chrome.i18n.getMessage('loading');
+            document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
             t3Review.loadIssueDetails(url, revision);
         } else {
-            document.getElementById('status').innerText = chrome.i18n.getMessage('changeIdNotFound');
-            document.getElementById('status').setAttribute('class', 'status4xx');
+            document.getElementById(prefix + 'status').innerText = chrome.i18n.getMessage('changeIdNotFound');
+            document.getElementById(prefix + 'status').setAttribute('class', 'status4xx');
         }
     });
 });
