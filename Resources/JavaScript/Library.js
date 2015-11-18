@@ -16,7 +16,7 @@ var TYPO3Review_1447791881 = (function () {
     function createPopupDiv() {
         var containerDiv = document.createElement('div');
         containerDiv.id = 'TYPO3Review_1447791881';
-        containerDiv.innerHTML = '<div class="normalMode"><div id="' + prefix + 'status"></div>' +
+        containerDiv.innerHTML = '<div class="normalMode"><div id="' + prefix + 'closeButton">✖</div><div id="' + prefix + 'status"></div>' +
             '<div class="separator"></div>' +
             '<div id="' + prefix + 'loading" class="hide">' +
             '<div class="throbber" style="background-image: url(\'' + chrome.extension.getURL('Resources/Images/throbber.svg') + '\')"></div>' +
@@ -35,6 +35,12 @@ var TYPO3Review_1447791881 = (function () {
         } else {
             document.getElementsByTagName('html')[0].appendChild(containerDiv);
         }
+        containerDiv.style.visibility = 'hidden';
+
+        document.getElementById(prefix + 'closeButton').addEventListener('click', function () {
+            document.getElementById('TYPO3Review_1447791881').className = 'fadeOutFast';
+            document.getElementById('TYPO3Review_1447791881').style.visibility = 'hidden';
+        }, false);
 
     }
 
@@ -157,6 +163,8 @@ var TYPO3Review_1447791881 = (function () {
             popup;
 
         popup = document.getElementById('TYPO3Review_1447791881');
+        popup.className = '';
+        popup.style.visibility = 'visible';
         event.target.parentElement.parentElement.appendChild(popup);
 
         // Make sure the popup can scroll with the buttons in the table cell

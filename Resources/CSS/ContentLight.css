@@ -1,5 +1,5 @@
 #TYPO3Review_1447791881,
-#TYPO3Review_1447791881 .closeButton,
+#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton,
 #TYPO3Review_1447791881 .normalMode,
 #TYPO3Review_1447791881 .microMode,
 #TYPO3Review_1447791881 .sectionTitle,
@@ -20,7 +20,6 @@
 	text-shadow: none !important;
 	text-transform: none !important;
 	vertical-align: top !important;
-	visibility: visible !important;
 	width: auto !important;
 }
 
@@ -81,7 +80,7 @@
 	-webkit-animation: fadeout 0.3s;
 }
 
-#TYPO3Review_1447791881 .closeButton,
+#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton,
 #TYPO3Review_1447791881 .sectionTitle,
 #TYPO3Review_1447791881 .key {
 	color: rgb(100, 100, 100) !important;
@@ -93,7 +92,7 @@
 
 #TYPO3Review_1447791881 .url a,
 #TYPO3Review_1447791881 .sectionTitle,
-#TYPO3Review_1447791881 .closeButton:hover,
+#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton:hover,
 #TYPO3Review_1447791881 .key:hover {
 	color: rgb(50, 50, 50) !important;
 }
@@ -124,7 +123,7 @@
 	-webkit-user-select: none !important;
 }
 
-#TYPO3Review_1447791881 .closeButton {
+#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton {
 	cursor: pointer !important;
 	position: absolute !important;
 	top: 4px !important;
