@@ -7,6 +7,8 @@
 var TYPO3Review_1447791881 = (function () {
     'use strict';
 
+    var activeTabId;
+
     var prefix = 'TYPO3Review_1447791881_';
 
     /**
@@ -28,6 +30,10 @@ var TYPO3Review_1447791881 = (function () {
             '<input id="' + prefix + 'resetButton" class="button" type="button" name="cmd" value="Reset Review Sites">' +
             '<br/>' +
             '<input id="' + prefix + 'updateButton" class="button" type="button" name="cmd" value="Update Review Sites">' +
+            '<div class="separator"></div>' +
+            '<input id="' + prefix + 'openReviewSiteButton" class="button" type="button" name="cmd" value="Open Review Site">' +
+            '<br/>' +
+            '<input id="' + prefix + 'openReferenceSiteButton" class="button" type="button" name="cmd" value="Open Reference Site">' +
             '</div></div>';
 
         if (document.getElementsByTagName('body')[0]) {
@@ -127,6 +133,57 @@ var TYPO3Review_1447791881 = (function () {
             runCherryPickCommand(cherryPickCommand);
         }
         return cherryPickCommand;
+    }
+
+    /**
+     * Open review site
+     */
+    function openReferenceSite() {
+        var url = "http://dev-master.local.typo3.org/typo3/";
+        if (chrome.tabs !== undefined) {
+            chrome.tabs.query({
+                active: true,
+                currentWindow: true
+            }, function (tabs) {
+                chrome.tabs.create({'url': url, 'index': tabs[0].index + 1, 'active': false});
+            });
+        }
+
+        if (activeTabId !== undefined) {
+            chrome.runtime.sendMessage({
+                from: 'content',
+                cmd: 'openTab',
+                url: url,
+                index: activeTabId + 1
+            }, function () {
+            });
+        }
+
+    }
+
+    /**
+     * Open review site
+     */
+    function openReviewSite() {
+        var url = "http://review.local.typo3.org/typo3/";
+        if (chrome.tabs !== undefined) {
+            chrome.tabs.query({
+                active: true,
+                currentWindow: true
+            }, function (tabs) {
+                chrome.tabs.create({'url': url, 'index': tabs[0].index + 1, 'active': false});
+            });
+        }
+
+        if (activeTabId !== undefined) {
+            chrome.runtime.sendMessage({
+                from: 'content',
+                cmd: 'openTab',
+                url: url,
+                index: activeTabId + 1
+            }, function () {
+            });
+        }
     }
 
     /**
@@ -268,10 +325,10 @@ var TYPO3Review_1447791881 = (function () {
                 });
             }, false);
         }
-        resetButton = document.getElementById(prefix + 'resetButton');
-        resetButton.addEventListener('click', resetReviewSites, false);
-        updateButton = document.getElementById(prefix + 'updateButton');
-        updateButton.addEventListener('click', updateReviewSites, false);
+        document.getElementById(prefix + 'resetButton').addEventListener('click', resetReviewSites, false);
+        document.getElementById(prefix + 'updateButton').addEventListener('click', updateReviewSites, false);
+        document.getElementById(prefix + 'openReferenceSiteButton').addEventListener('click', openReferenceSite, false);
+        document.getElementById(prefix + 'openReviewSiteButton').addEventListener('click', openReviewSite, false);
     }
 
     var publicMethods = {
@@ -314,8 +371,17 @@ var TYPO3Review_1447791881 = (function () {
          * Get the id prefix
          * @returns {string}
          */
-        getPrefix: function() {
+        getPrefix: function () {
             return prefix;
+        },
+
+        /**
+         * Set the active tab id
+         *
+         * @param tab
+         */
+        setActiveTabId: function (tabId) {
+            activeTabId = tabId;
         },
 
         /**
@@ -400,7 +466,7 @@ var TYPO3Review_1447791881 = (function () {
          * @param sender
          * @param sendResponse
          */
-        messageListener: function (request, sender, sendResponse) {
+        contentMessageListener: function (request, sender, sendResponse) {
             var button,
                 clone,
                 externalLinkIcon,
@@ -434,10 +500,8 @@ var TYPO3Review_1447791881 = (function () {
                     }
                 }
             }
-
-            sendResponse({reviewNode: reviewTextNode});
+            sendResponse({});
         }
-
     };
 
     return publicMethods;

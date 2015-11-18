@@ -108,3 +108,30 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
     }
 });
+
+/**
+ * Handles messages from other extension parts to content script
+ *
+ * @param request
+ * @param sender
+ * @param sendResponse
+ */
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        'use strict';
+        var response;
+        if (request.cmd === 'getActiveTabId' && request.from === 'content') {
+            sendResponse(sender.tab.index);
+        }
+        if (request.cmd === 'openTab' && request.from === 'content') {
+            chrome.tabs.create({
+                'url': request.url,
+                'index': request.index,
+                'active': false
+            });
+            response = "ok";
+            sendResponse(response);
+        }
+    }
+);
+
