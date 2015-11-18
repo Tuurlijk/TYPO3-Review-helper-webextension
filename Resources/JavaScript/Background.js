@@ -102,7 +102,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
                     gerritUrl: gerritUrl
                 },
                 function (response) {
-                    console.log(response);
+                    //console.log(response);
                 }
             );
         }

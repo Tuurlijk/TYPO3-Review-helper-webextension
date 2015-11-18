@@ -17,8 +17,9 @@ var TYPO3Review_1447791881 = (function () {
         var containerDiv = document.createElement('div');
         containerDiv.id = 'TYPO3Review_1447791881';
         containerDiv.innerHTML = '<div class="normalMode"><div id="' + prefix + 'status"></div>' +
+            '<div class="separator"></div>' +
             '<div id="' + prefix + 'loading" class="hide">' +
-            '<div class="throbber"></div>' +
+            '<div class="throbber" style="background-image: url(\'' + chrome.extension.getURL('Resources/Images/throbber.svg') + '\')"></div>' +
             '</div>' +
             '<div class="buttons">' +
             '<div id="' + prefix + 'currentRevision"></div>' +
@@ -158,6 +159,9 @@ var TYPO3Review_1447791881 = (function () {
         popup = document.getElementById('TYPO3Review_1447791881');
         event.target.parentElement.parentElement.appendChild(popup);
 
+        // Make sure the popup can scroll with the buttons in the table cell
+        event.target.parentElement.parentElement.style.position = 'relative';
+
         publicMethods.checkReviewSiteAvailability();
 
         if (changeDetailUrl) {
@@ -225,7 +229,7 @@ var TYPO3Review_1447791881 = (function () {
             if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
                 cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                 if (cherryPickCommand !== '') {
-                    document.getElementById(prefix + 'currentRevision').innerHTML = '<input class="revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
+                    document.getElementById(prefix + 'currentRevision').innerHTML = '<input class="' + prefix + 'revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
                 } else {
                     alert('doh! No cherry pick command found.');
                 }
@@ -237,7 +241,7 @@ var TYPO3Review_1447791881 = (function () {
             if (parseInt(currentRevision._number, 10) !== parseInt(revision, 10)) {
                 cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                 if (cherryPickCommand !== '') {
-                    allRevisionButtons += '<input type="button" class="revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '"><br/>';
+                    allRevisionButtons += '<input type="button" class="' + prefix + 'revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '"><br/>';
                 } else {
                     alert('doh! No cherry pick command found.');
                 }

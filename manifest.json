@@ -41,5 +41,6 @@
     "48": "Resources/Icons/Icon48.png",
     "128": "Resources/Icons/Icon128.png"
   },
-  "options_page": "Resources/HTML/Options.html"
+  "options_page": "Resources/HTML/Options.html",
+  "web_accessible_resources": ["Resources/Images/throbber.svg"]
 }
