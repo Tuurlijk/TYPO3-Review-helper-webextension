@@ -8,6 +8,33 @@ var TYPO3Review_1447791881 = (function () {
     'use strict';
 
     /**
+     * Create popup element
+     *
+     */
+    function createPopupDiv() {
+        var containerDiv = document.createElement('div');
+        containerDiv.id = 'TYPO3Review_1447791881';
+        containerDiv.innerHTML = '<div class="normalMode"><div id="TYPO3Review_1447791881_status"></div>' +
+            '<div id="TYPO3Review_1447791881_loading" class="hide">' +
+            '<div class="throbber"></div>' +
+            '</div>' +
+            '<div class="buttons">' +
+            '<div id="TYPO3Review_1447791881_currentRevision"></div>' +
+            '<div id="TYPO3Review_1447791881_allRevisions"></div>' +
+            '<div class="separator"></div>' +
+            '<input id="TYPO3Review_1447791881_resetButton" class="button" type="button" name="cmd" value="Reset Review Sites">' +
+            '<input id="TYPO3Review_1447791881_updateButton" class="button" type="button" name="cmd" value="Update Review Sites">' +
+            '</div></div>';
+
+        if (document.getElementsByTagName('body')[0]) {
+            document.getElementsByTagName('body')[0].appendChild(containerDiv);
+        } else {
+            document.getElementsByTagName('html')[0].appendChild(containerDiv);
+        }
+
+    }
+
+    /**
      * Gen the number of objects within an object
      *
      * @param object
@@ -118,12 +145,16 @@ var TYPO3Review_1447791881 = (function () {
 
     /**
      * Show review popup
-     * @param url
+     * @param event
      */
-    function showReviewPopup(url) {
-        var changeDetailUrl = publicMethods.getChangeDetailUrl(url),
-            revision = 'latest';
+    function showReviewPopup(event) {
+        var changeDetailUrl = publicMethods.getChangeDetailUrl(event.target.parentElement.href),
+            revision = 'latest',
+            popup;
 
+        console.log(changeDetailUrl);
+        popup = document.getElementById('TYPO3Review_1447791881');
+        event.target.parentElement.parentElement.appendChild(popup);
     }
 
     /**
@@ -348,6 +379,7 @@ var TYPO3Review_1447791881 = (function () {
 
             // Execute the requested command
             if (request.cmd === 'addButtons') {
+                createPopupDiv();
                 links = document.getElementsByTagName('a');
                 for (m = 0, n = links.length; m < n; ++m) {
                     if (links[m].href.startsWith(request.gerritUrl)) {
@@ -361,7 +393,7 @@ var TYPO3Review_1447791881 = (function () {
                         button.appendChild(reviewTextNode);
                         clone.addEventListener('click', function (event) {
                             event.preventDefault();
-                            showReviewPopup(event.target.parentElement.href);
+                            showReviewPopup(event);
                         }, false);
                         parent.appendChild(clone);
                         ++m;
