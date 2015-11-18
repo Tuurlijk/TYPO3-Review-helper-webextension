@@ -90,7 +90,7 @@ var TYPO3Review_1447791881 = (function () {
     function runCherryPickCommand(cherryPickCommand) {
         var xhr = new XMLHttpRequest(),
             parameters = "parameter=" + encodeURIComponent(cherryPickCommand) + "&cmd=review";
-        xhr.open('POST', 'http://local.typo3.org/review.php', true);
+        xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
         xhr.onerror = xhrError('Failed to run the cherry pick command');
@@ -129,7 +129,7 @@ var TYPO3Review_1447791881 = (function () {
         document.getElementById(prefix + 'loading').className = 'loading';
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=reset";
-        xhr.open('POST', 'http://local.typo3.org/review.php', true);
+        xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
         xhr.onerror = xhrError('Failed to reset the sites');
@@ -155,9 +155,19 @@ var TYPO3Review_1447791881 = (function () {
             revision = 'latest',
             popup;
 
-        console.log(changeDetailUrl);
         popup = document.getElementById('TYPO3Review_1447791881');
         event.target.parentElement.parentElement.appendChild(popup);
+
+        publicMethods.checkReviewSiteAvailability();
+
+        if (changeDetailUrl) {
+            document.getElementById(prefix + 'status').innerText = chrome.i18n.getMessage('loading');
+            document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
+            publicMethods.loadIssueDetails(changeDetailUrl, revision);
+        } else {
+            document.getElementById(prefix + 'status').innerText = chrome.i18n.getMessage('changeIdNotFound');
+            document.getElementById(prefix + 'status').setAttribute('class', 'status4xx');
+        }
     }
 
     /**
@@ -167,7 +177,7 @@ var TYPO3Review_1447791881 = (function () {
         document.getElementById(prefix + 'loading').className = 'loading';
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=update";
-        xhr.open('POST', 'http://local.typo3.org/review.php', true);
+        xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
         xhr.onerror = xhrError('Failed to update the sites');
@@ -227,7 +237,7 @@ var TYPO3Review_1447791881 = (function () {
             if (parseInt(currentRevision._number, 10) !== parseInt(revision, 10)) {
                 cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                 if (cherryPickCommand !== '') {
-                    allRevisionButtons += '<input type="button" class="revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '">';
+                    allRevisionButtons += '<input type="button" class="revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '"><br/>';
                 } else {
                     alert('doh! No cherry pick command found.');
                 }
@@ -331,7 +341,7 @@ var TYPO3Review_1447791881 = (function () {
          */
         checkReviewSiteAvailability: function () {
             var xhr = new XMLHttpRequest();
-            xhr.open('HEAD', 'http://local.typo3.org/review.php', true);
+            xhr.open('HEAD', 'https://local.typo3.org/review.php', true);
             xhr.send(null);
             xhr.onerror = xhrError;
             xhr.timeout = 1000;

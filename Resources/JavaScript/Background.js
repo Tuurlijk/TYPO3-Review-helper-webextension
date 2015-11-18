@@ -108,36 +108,3 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
     }
 });
-
-/**
- * Capture messages from the Content script. When the content is ready,
- * inject the CSS and pass the headers and the options to the content.
- */
-chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-    var msg = request.msg;
-    if (msg === 'contentReady') {
-        if (typeof sender.tab !== 'undefined') {
-            var optionsObject = getStorage('HTTPSpyOptions'),
-                options = optionsObject['App.Options'].records[1];
-            if (options.displayInfoBox) {
-                if (parseInt(sender.tab.id, 10) > 0) {
-                    if (options.infoBoxTheme === 'light') {
-                        chrome.tabs.insertCSS(sender.tab.id, {
-                            file: '/Resources/CSS/ContentLight.css'
-                        });
-                    } else {
-                        chrome.tabs.insertCSS(sender.tab.id, {
-                            file: '/Resources/CSS/ContentDark.css'
-                        });
-                    }
-                    chrome.tabs.sendRequest(sender.tab.id, {
-                        msg: 'headersAndStatus',
-                        headers: headerStore[sender.tab.id],
-                        options: options
-                    });
-                }
-            }
-        }
-    }
-    sendResponse({});
-});

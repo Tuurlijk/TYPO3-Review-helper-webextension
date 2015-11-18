@@ -179,6 +179,21 @@
 @-webkit-keyframes fadeout {from {opacity: 1;} to {opacity: 0}}
 @media print{#TYPO3Review_1447791881{display:none !important;}}
 
+#TYPO3Review_1447791881 .separator {
+	border-top: 1px solid #c2c2c2;
+	margin: 4px 2px;
+}
+
+#TYPO3Review_1447791881 .throbber {
+	position: relative;
+	top: 48%;
+	left: 48%;
+	background: url('../Images/throbber.svg');
+	display: inline-block;
+	height: 16px;
+	width: 16px;
+}
+
 #TYPO3Review_1447791881 .button {
 	-webkit-appearance: none;
 	-webkit-user-select: none;
