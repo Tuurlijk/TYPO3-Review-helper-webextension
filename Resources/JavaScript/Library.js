@@ -31,9 +31,7 @@ var TYPO3Review_1447791881 = (function () {
             '<br/>' +
             '<input id="' + prefix + 'updateButton" class="button" type="button" name="cmd" value="Update Review Sites">' +
             '<div class="separator"></div>' +
-            '<input id="' + prefix + 'openReviewSiteButton" class="button" type="button" name="cmd" value="Open Review Site">' +
-            '<br/>' +
-            '<input id="' + prefix + 'openReferenceSiteButton" class="button" type="button" name="cmd" value="Open Reference Site">' +
+            '<input id="' + prefix + 'openReviewSitesButton" class="button" type="button" name="cmd" value="Open Review Sites">' +
             '</div></div>';
 
         if (document.getElementsByTagName('body')[0]) {
@@ -136,53 +134,39 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
-     * Open review site
+     * Open review sites
      */
-    function openReferenceSite() {
-        var url = "http://dev-master.local.typo3.org/typo3/";
+    function openReviewSites() {
+        var urls = [
+                "http://dev-master.local.typo3.org/typo3/"
+                "http://review.local.typo3.org/typo3/",
+            ],
+            count;
         if (chrome.tabs !== undefined) {
             chrome.tabs.query({
                 active: true,
                 currentWindow: true
             }, function (tabs) {
-                chrome.tabs.create({'url': url, 'index': tabs[0].index + 1, 'active': false});
+                for (count = 0; count < urls.length; count++) {
+                    chrome.tabs.create({
+                        'url': urls[count],
+                        'index': tabs[0].index + 1,
+                        'active': false
+                    });
+                }
             });
         }
 
         if (activeTabId !== undefined) {
-            chrome.runtime.sendMessage({
-                from: 'content',
-                cmd: 'openTab',
-                url: url,
-                index: activeTabId + 1
-            }, function () {
-            });
-        }
-
-    }
-
-    /**
-     * Open review site
-     */
-    function openReviewSite() {
-        var url = "http://review.local.typo3.org/typo3/";
-        if (chrome.tabs !== undefined) {
-            chrome.tabs.query({
-                active: true,
-                currentWindow: true
-            }, function (tabs) {
-                chrome.tabs.create({'url': url, 'index': tabs[0].index + 1, 'active': false});
-            });
-        }
-
-        if (activeTabId !== undefined) {
-            chrome.runtime.sendMessage({
-                from: 'content',
-                cmd: 'openTab',
-                url: url,
-                index: activeTabId + 1
-            }, function () {
-            });
+            for (count = 0; count < urls.length; count++) {
+                chrome.runtime.sendMessage({
+                    from: 'content',
+                    cmd: 'openTab',
+                    url: urls[count],
+                    index: activeTabId + 1
+                }, function () {
+                });
+            }
         }
     }
 
@@ -327,8 +311,7 @@ var TYPO3Review_1447791881 = (function () {
         }
         document.getElementById(prefix + 'resetButton').addEventListener('click', resetReviewSites, false);
         document.getElementById(prefix + 'updateButton').addEventListener('click', updateReviewSites, false);
-        document.getElementById(prefix + 'openReferenceSiteButton').addEventListener('click', openReferenceSite, false);
-        document.getElementById(prefix + 'openReviewSiteButton').addEventListener('click', openReviewSite, false);
+        document.getElementById(prefix + 'openReviewSitesButton').addEventListener('click', openReviewSites, false);
     }
 
     var publicMethods = {
