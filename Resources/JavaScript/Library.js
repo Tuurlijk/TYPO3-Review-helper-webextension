@@ -138,8 +138,8 @@ var TYPO3Review_1447791881 = (function () {
      */
     function openReviewSites() {
         var urls = [
-                "http://dev-master.local.typo3.org/typo3/"
-                "http://review.local.typo3.org/typo3/",
+                "http://dev-master.local.typo3.org/typo3/",
+                "http://review.local.typo3.org/typo3/"
             ],
             count;
         if (chrome.tabs !== undefined) {
