@@ -7,12 +7,49 @@
 var TYPO3Review_1447791881 = (function () {
     'use strict';
 
-    var activeTabId;
+    /**
+     * The id of the active tab
+     *
+     * @since 1.0.0
+     */
+    var activeTabId,
 
-    var prefix = 'TYPO3Review_1447791881_';
+        /**
+         * ID prefix used to uniquely target elements in content script
+         *
+         * @since 1.0.0
+         *
+         * @type {string}
+         */
+        prefix = 'TYPO3Review_1447791881_',
+
+        /**
+         * API endpoint
+         *
+         * @since 1.0.0
+         *
+         * @type {string}
+         */
+        apiEnd = 'https://local.typo3.org',
+
+        /**
+         * API version
+         *
+         * @since 1.0.0
+         */
+        apiVersion = '0',
+
+        /**
+         * Is the review site available?
+         *
+         * @since 1.0.0
+         */
+        isReviewSiteAvailable = false;
 
     /**
      * Create popup element
+     *
+     * @since 1.0.0
      *
      */
     function createPopupDiv() {
@@ -51,7 +88,10 @@ var TYPO3Review_1447791881 = (function () {
     /**
      * Gen the number of objects within an object
      *
+     * @since 1.0.0
+     *
      * @param object
+     *
      * @returns {number}
      */
     function objectLength(object) {
@@ -68,8 +108,11 @@ var TYPO3Review_1447791881 = (function () {
     /**
      * Sort function to sort objectArray by number
      *
+     * @since 1.0.0
+     *
      * @param {object} a  Object a.
      * @param {object} b  Object b.
+     *
      * @return {*}  Not defined.
      */
     function sortObjectArrayByRevision(a, b) {
@@ -83,19 +126,10 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
-     * Display error message
-     *
-     * @param message
-     */
-    function xhrError(message) {
-        if (message === undefined) {
-            message = 'Doh!';
-        }
-        console.log(message);
-    }
-
-    /**
      * Reset and update are also possible cmd values
+     *
+     * @since 1.0.0
+     *
      * @param cherryPickCommand
      */
     function runCherryPickCommand(cherryPickCommand) {
@@ -104,15 +138,13 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = xhrError('Failed to run the cherry pick command');
+        xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    document.getElementById(prefix + 'loading').className = 'hide';
-                    document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('cherryPickSuccess');
-                    document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
+                    publicMethods.setStatusMessage(chrome.i18n.getMessage('cherryPickSuccess'));
                 } else {
-                    xhrError('Failed to run the cherry pick command');
+                    publicMethods.setStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
                 }
             }
         };
@@ -120,7 +152,11 @@ var TYPO3Review_1447791881 = (function () {
 
     /**
      * Get the cherry-pick command from the revision data
+     *
+     * @since 1.0.0
+     *
      * @param currentRevision
+     *
      * @returns {string}
      */
     function getCherryPickCommand(currentRevision) {
@@ -135,6 +171,8 @@ var TYPO3Review_1447791881 = (function () {
 
     /**
      * Open review sites
+     *
+     * @since 1.0.0
      */
     function openReviewSites() {
         var urls = [
@@ -172,6 +210,8 @@ var TYPO3Review_1447791881 = (function () {
 
     /**
      * Reset review sites
+     *
+     * @since 1.0.0
      */
     function resetReviewSites() {
         document.getElementById(prefix + 'loading').className = 'loading';
@@ -180,15 +220,13 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = xhrError('Failed to reset the sites');
+        xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    document.getElementById(prefix + 'loading').className = 'hide';
-                    document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('resetSitesSuccess');
-                    document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
+                    publicMethods.setStatusMessage(chrome.i18n.getMessage('resetSitesSuccess'));
                 } else {
-                    xhrError('Failed to reset the sites');
+                    publicMethods.setStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
                 }
             }
         };
@@ -196,6 +234,9 @@ var TYPO3Review_1447791881 = (function () {
 
     /**
      * Show review popup
+     *
+     * @since 1.0.0
+     *
      * @param event
      */
     function showReviewPopup(event) {
@@ -211,20 +252,24 @@ var TYPO3Review_1447791881 = (function () {
         // Make sure the popup can scroll with the buttons in the table cell
         event.target.parentElement.parentElement.style.position = 'relative';
 
-        publicMethods.checkReviewSiteAvailability();
+        // Set the review api version
+        var promise = new Promise(function (resolve, reject) {
+            resolve(publicMethods.getApiVersion());
+        });
+        publicMethods.getReviewSiteAvailability();
 
         if (changeDetailUrl) {
-            document.getElementById(prefix + 'status').innerText = chrome.i18n.getMessage('loading');
-            document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
+            document.getElementById(prefix + 'loading').className = 'loading';
             publicMethods.loadIssueDetails(changeDetailUrl, revision);
         } else {
-            document.getElementById(prefix + 'status').innerText = chrome.i18n.getMessage('changeIdNotFound');
-            document.getElementById(prefix + 'status').setAttribute('class', 'status4xx');
+            publicMethods.setStatusMessage(chrome.i18n.getMessage('changeIdNotFound', 'error'));
         }
     }
 
     /**
      * Update review sites
+     *
+     * @since 1.0.0
      */
     function updateReviewSites() {
         document.getElementById(prefix + 'loading').className = 'loading';
@@ -233,15 +278,13 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = xhrError('Failed to update the sites');
+        xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    document.getElementById(prefix + 'loading').className = 'hide';
-                    document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('updateSitesSuccess');
-                    document.getElementById(prefix + 'status').setAttribute('class', 'status2xx');
+                    publicMethods.setStatusMessage(chrome.i18n.getMessage('updateSitesSuccess'));
                 } else {
-                    xhrError('Failed to update the sites');
+                    publicMethods.setStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
                 }
             }
         };
@@ -249,6 +292,8 @@ var TYPO3Review_1447791881 = (function () {
 
     /**
      * Create review buttons
+     *
+     * @since 1.0.0
      *
      * @param responseText
      * @param revision
@@ -319,6 +364,8 @@ var TYPO3Review_1447791881 = (function () {
         /**
          * Get the change detail url
          *
+         * @since 1.0.0
+         *
          * @param url
          * @returns {string}
          */
@@ -352,6 +399,9 @@ var TYPO3Review_1447791881 = (function () {
 
         /**
          * Get the id prefix
+         *
+         * @since 1.0.0
+         *
          * @returns {string}
          */
         getPrefix: function () {
@@ -361,7 +411,9 @@ var TYPO3Review_1447791881 = (function () {
         /**
          * Set the active tab id
          *
-         * @param tab
+         * @since 1.0.0
+         *
+         * @param tabId
          */
         setActiveTabId: function (tabId) {
             activeTabId = tabId;
@@ -369,6 +421,8 @@ var TYPO3Review_1447791881 = (function () {
 
         /**
          * Get currently viewed revision
+         *
+         * @since 1.0.0
          *
          * @param url
          * @returns {string}
@@ -398,23 +452,46 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
-         * Check if the review site is available
+         * Get the API version
+         *
+         * @since 1.0.0
          */
-        checkReviewSiteAvailability: function () {
+        getApiVersion: function () {
+            var xhr = new XMLHttpRequest(),
+                response;
+            xhr.open('GET', apiEnd + '/version', true);
+            xhr.send(null);
+            xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+            ;
+            xhr.onload = function () {
+                response = JSON.parse(xhr.responseText);
+                if (response.status === 'OK') {
+                    apiVersion = response.stdout;
+                }
+            };
+        },
+
+        /**
+         * Check if the review site is available
+         *
+         * @since 1.0.0
+         */
+        getReviewSiteAvailability: function () {
             var xhr = new XMLHttpRequest();
             xhr.open('HEAD', 'https://local.typo3.org/review.php', true);
             xhr.send(null);
-            xhr.onerror = xhrError;
+            xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+            ;
             xhr.timeout = 1000;
             xhr.ontimeout = function () {
-                document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('reviewSiteUnavailable') + ": <a href='https://github.com/Tuurlijk/TYPO3.Review' target='github'>https://github.com/Tuurlijk/TYPO3.Review</a>.";
-                document.getElementById(prefix + 'status').setAttribute('class', 'status4xx');
+                isReviewSiteAvailable = false;
+                publicMethods.setStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
             };
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
-                    if (xhr.status === 400) {
-                        document.getElementById(prefix + 'status').innerHTML = chrome.i18n.getMessage('reviewSiteUnavailable') + ": <a href='https://github.com/Tuurlijk/TYPO3.Review' target='github'>https://github.com/Tuurlijk/TYPO3.Review</a>.";
-                        document.getElementById(prefix + 'status').setAttribute('class', 'status4xx');
+                    if (xhr.status === 0 || xhr.status === 400 || xhr.status === 404) {
+                        isReviewSiteAvailable = false;
+                        publicMethods.setStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
                     }
                 }
             };
@@ -422,6 +499,8 @@ var TYPO3Review_1447791881 = (function () {
 
         /**
          * Load the details for a certains issue
+         *
+         * @since 1.0.0
          *
          * @param url
          * @param revision
@@ -435,15 +514,18 @@ var TYPO3Review_1447791881 = (function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         createReviewButtons(xhr.responseText, revision);
-                        document.getElementById(prefix + 'status').setAttribute('class', 'hide');
+                        document.getElementById(prefix + 'loading').className = 'hide';
                     }
                 }
             };
-            xhr.onerror = xhrError;
+            xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
+            ;
         },
 
         /*
          * Handles messages from other extension parts to content script
+         *
+         * @since 1.0.0
          *
          * @param request
          * @param sender
@@ -460,7 +542,8 @@ var TYPO3Review_1447791881 = (function () {
                 reviewTextNode;
 
             // Execute the requested command
-            if (request.cmd === 'addButtons') {
+            switch (request.cmd) {
+            case 'addButtons':
                 createPopupDiv();
                 links = document.getElementsByTagName('a');
                 for (m = 0, n = links.length; m < n; ++m) {
@@ -482,9 +565,36 @@ var TYPO3Review_1447791881 = (function () {
                         ++n;
                     }
                 }
+                break;
+            case 'insecureResponse':
+                publicMethods.setStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error');
+                break;
             }
             sendResponse({});
+        },
+
+        /**
+         * Set status message
+         *
+         * @since 1.0.0
+         *
+         * @param message
+         * @param status
+         */
+        setStatusMessage: function (message, status) {
+            if (status === undefined) {
+                status = '2xx';
+            } else if (status === 'error') {
+                status = '4xx';
+            } else {
+                status = '4xx';
+            }
+
+            document.getElementById(prefix + 'loading').className = 'hide';
+            document.getElementById(prefix + 'status').innerHTML = message;
+            document.getElementById(prefix + 'status').setAttribute('class', 'status' + status);
         }
+
     };
 
     return publicMethods;

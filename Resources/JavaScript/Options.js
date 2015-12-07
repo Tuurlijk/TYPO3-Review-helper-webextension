@@ -8,6 +8,8 @@ jQuery(document).ready(function ($) {
 
     /**
      * Restore Options
+     *
+     * @since 1.0.0
      */
     function restore_options() {
         var forgerUrl = localStorage.forgerUrl,
@@ -25,6 +27,8 @@ jQuery(document).ready(function ($) {
 
     /**
      * Save Options
+     *
+     * @since 1.0.0
      */
     function save_options() {
         localStorage.forgerUrl = $('#forgerUrl').val();
