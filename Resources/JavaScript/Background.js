@@ -142,8 +142,7 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
         } else {
             views = chrome.extension.getViews({type: 'popup'});
             for (i = 0; i < views.length; i = i + 1) {
-                TYPO3Review_1447791881.setStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error', views[i].document);
-                //views[i].document.getElementById('TYPO3Review_1447791881_status').innerHTML = chrome.i18n.getMessage('certificateFailure');
+                TYPO3Review_1447791881.addStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error', views[i].document);
             }
         }
     }

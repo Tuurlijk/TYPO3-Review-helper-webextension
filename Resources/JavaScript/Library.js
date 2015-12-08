@@ -138,13 +138,13 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
+        xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    publicMethods.setStatusMessage(chrome.i18n.getMessage('cherryPickSuccess'));
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickSuccess'));
                 } else {
-                    publicMethods.setStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
                 }
             }
         };
@@ -220,13 +220,13 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
+        xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    publicMethods.setStatusMessage(chrome.i18n.getMessage('resetSitesSuccess'));
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('resetSitesSuccess'));
                 } else {
-                    publicMethods.setStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
                 }
             }
         };
@@ -262,7 +262,7 @@ var TYPO3Review_1447791881 = (function () {
             document.getElementById(prefix + 'loading').className = 'loading';
             publicMethods.loadIssueDetails(changeDetailUrl, revision);
         } else {
-            publicMethods.setStatusMessage(chrome.i18n.getMessage('changeIdNotFound', 'error'));
+            publicMethods.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound', 'error'));
         }
     }
 
@@ -278,13 +278,13 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
+        xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    publicMethods.setStatusMessage(chrome.i18n.getMessage('updateSitesSuccess'));
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('updateSitesSuccess'));
                 } else {
-                    publicMethods.setStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
                 }
             }
         };
@@ -461,7 +461,7 @@ var TYPO3Review_1447791881 = (function () {
                 response;
             xhr.open('GET', apiEnd + '/version', true);
             xhr.send(null);
-            xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+            xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
             ;
             xhr.onload = function () {
                 response = JSON.parse(xhr.responseText);
@@ -480,18 +480,18 @@ var TYPO3Review_1447791881 = (function () {
             var xhr = new XMLHttpRequest();
             xhr.open('HEAD', 'https://local.typo3.org/review.php', true);
             xhr.send(null);
-            xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+            xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
             ;
             xhr.timeout = 1000;
             xhr.ontimeout = function () {
                 isReviewSiteAvailable = false;
-                publicMethods.setStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
             };
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 0 || xhr.status === 400 || xhr.status === 404) {
                         isReviewSiteAvailable = false;
-                        publicMethods.setStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                        publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
                     }
                 }
             };
@@ -518,7 +518,7 @@ var TYPO3Review_1447791881 = (function () {
                     }
                 }
             };
-            xhr.onerror = publicMethods.setStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
+            xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
             ;
         },
 
@@ -567,7 +567,7 @@ var TYPO3Review_1447791881 = (function () {
                 }
                 break;
             case 'insecureResponse':
-                publicMethods.setStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error');
+                publicMethods.addStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error');
                 break;
             }
             sendResponse({});
@@ -582,7 +582,7 @@ var TYPO3Review_1447791881 = (function () {
          * @param status
          * @param alternativeDocument
          */
-        setStatusMessage: function (message, status, alternativeDocument) {
+        addStatusMessage: function (message, status, alternativeDocument) {
             var theDocument;
             if (alternativeDocument !== undefined) {
                 theDocument = alternativeDocument;

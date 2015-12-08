@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById(prefix + 'loading').className = 'loading';
             t3Review.loadIssueDetails(url, revision);
         } else {
-            t3Review.setStatusMessage(chrome.i18n.getMessage('changeIdNotFound'), 'error');
+            t3Review.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound'), 'error');
         }
     });
 });
