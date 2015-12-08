@@ -127,19 +127,10 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 chrome.webRequest.onErrorOccurred.addListener(function (details) {
     'use strict';
     if (details.error === 'net::ERR_INSECURE_RESPONSE') {
-        var tabId = details.tabId;
-
-        if (tabId <= 0) {
-            chrome.tabs.query({
-                active: true,
-                currentWindow: true
-            }, function (tabs) {
-                tabId = tabs[0].id;
-            });
-        }
-        if (tabId > 0) {
+        var i, views;
+        if (details.tabId > 0) {
             chrome.tabs.sendMessage(
-                tabId,
+                details.tabId,
                 {
                     cmd: 'insecureResponse',
                     details: details
@@ -148,10 +139,16 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
                     console.log(response);
                 }
             );
+        } else {
+            views = chrome.extension.getViews({type: 'popup'});
+            for (i = 0; i < views.length; i = i + 1) {
+                TYPO3Review_1447791881.setStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error', views[i].document);
+                //views[i].document.getElementById('TYPO3Review_1447791881_status').innerHTML = chrome.i18n.getMessage('certificateFailure');
+            }
         }
     }
 }, {
-    urls: ['*://*.typo3.org/*'],
+    urls: ['*://*.local.typo3.org/*'],
     types: ['xmlhttprequest']
 });
 
@@ -171,7 +168,7 @@ chrome.runtime.onMessage.addListener(
         if (request.cmd === 'getActiveTabId' && request.from === 'content') {
             sendResponse(sender.tab.index);
         }
-        if (request.cmd === 'openTab' && request.from === 'content') {
+        if (request.cmd === 'openTab' && request.from === 'library') {
             chrome.tabs.create({
                 'url': request.url,
                 'index': request.index,

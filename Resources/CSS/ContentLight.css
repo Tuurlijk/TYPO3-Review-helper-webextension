@@ -80,6 +80,7 @@
 	-webkit-animation: fadeout 0.3s;
 }
 
+#TYPO3Review_1447791881_status .closeButton,
 #TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton,
 #TYPO3Review_1447791881 .sectionTitle,
 #TYPO3Review_1447791881 .key {
@@ -92,6 +93,7 @@
 
 #TYPO3Review_1447791881 .url a,
 #TYPO3Review_1447791881 .sectionTitle,
+#TYPO3Review_1447791881_status .closeButton:hover,
 #TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton:hover,
 #TYPO3Review_1447791881 .key:hover {
 	color: rgb(50, 50, 50) !important;
@@ -123,6 +125,24 @@
 	-webkit-user-select: none !important;
 }
 
+#TYPO3Review_1447791881_status .message {
+	position: relative;
+	border: 1px solid #c2c2c2;
+	padding: 0.4em;
+	margin: 0.25em 0;
+}
+
+#TYPO3Review_1447791881_status .message.status2xx {
+	border: 1px solid rgba(0, 125, 0, 0.25);
+	border-left: 2px solid #00aa00;
+}
+
+#TYPO3Review_1447791881_status .message.status4xx {
+	border: 1px solid rgba(125, 0, 0, 0.25);
+	border-left: 2px solid #c60000;
+}
+
+#TYPO3Review_1447791881_status .closeButton,
 #TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton {
 	cursor: pointer !important;
 	position: absolute !important;

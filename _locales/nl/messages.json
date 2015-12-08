@@ -41,7 +41,7 @@
   },
   "certificateFailure": {
     "description": "Message shown in the popup when certificate has not yet been accepted",
-    "message": "Failed to connect to the review API. Please navigate to <a href='https://local.typo3.org/review.php' target='_blank'>http://local.typo3.org/review.php</a> and accept the certificate."
+    "message": "Failed to connect to the review API over https. Please navigate to <a href='https://local.typo3.org/review.php' target='_blank'>http://local.typo3.org/review.php</a> and accept the certificate."
   },
   "apiVersionFetchFail": {
     "description": "Message shown in the popup when fetching the api version failed",

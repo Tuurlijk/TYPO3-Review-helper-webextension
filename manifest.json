@@ -1,8 +1,8 @@
 {
   "name": "__MSG_extensionName__",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "manifest_version": 2,
-  "minimum_chrome_version": "18",
+  "minimum_chrome_version": "22",
   "description": "__MSG_extensionDescription__",
   "homepage_url": "http://www.donationbasedhosting.org/",
   "default_locale": "en",

@@ -198,7 +198,7 @@ var TYPO3Review_1447791881 = (function () {
         if (activeTabId !== undefined) {
             for (count = 0; count < urls.length; count++) {
                 chrome.runtime.sendMessage({
-                    from: 'content',
+                    from: 'library',
                     cmd: 'openTab',
                     url: urls[count],
                     index: activeTabId + 1
@@ -574,14 +574,26 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
-         * Set status message
+         * Add status message
          *
          * @since 1.0.0
          *
          * @param message
          * @param status
+         * @param alternativeDocument
          */
-        setStatusMessage: function (message, status) {
+        setStatusMessage: function (message, status, alternativeDocument) {
+            var theDocument;
+            if (alternativeDocument !== undefined) {
+                theDocument = alternativeDocument;
+            } else {
+                theDocument = document;
+            }
+
+            var timestamp = (new Date).getTime(),
+                messageDiv = theDocument.createElement('div'),
+                closeButton = theDocument.createElement('div');
+
             if (status === undefined) {
                 status = '2xx';
             } else if (status === 'error') {
@@ -590,9 +602,30 @@ var TYPO3Review_1447791881 = (function () {
                 status = '4xx';
             }
 
-            document.getElementById(prefix + 'loading').className = 'hide';
-            document.getElementById(prefix + 'status').innerHTML = message;
-            document.getElementById(prefix + 'status').setAttribute('class', 'status' + status);
+            theDocument.getElementById(prefix + 'loading').className = 'hide';
+
+            messageDiv.id = 'TYPO3Review_' + timestamp;
+            messageDiv.innerHTML = message;
+            messageDiv.setAttribute('class', 'message status' + status);
+
+            closeButton.id = 'TYPO3Review_' + timestamp + '_closeButton';
+            closeButton.setAttribute('class', 'closeButton');
+            closeButton.innerText = '✖';
+            messageDiv.appendChild(closeButton);
+
+            if (theDocument.getElementById(prefix + 'status').firstChild) {
+                theDocument.getElementById(prefix + 'status').insertBefore(
+                    messageDiv,
+                    theDocument.getElementById(prefix + 'status').firstChild
+                );
+            } else {
+                theDocument.getElementById(prefix + 'status').appendChild(messageDiv);
+            }
+
+            theDocument.getElementById(messageDiv.id + '_closeButton').addEventListener('click', function () {
+                theDocument.getElementById(messageDiv.id).className = 'fadeOutFast';
+                theDocument.getElementById(messageDiv.id).style.display = 'none';
+            }, false);
         }
 
     };
