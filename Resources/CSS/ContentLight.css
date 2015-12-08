@@ -70,11 +70,19 @@
 	width: 220px !important;
 }
 
+#TYPO3Review_1447791881_status .fadeIn,
+#TYPO3Review_1447791881.fadeIn {
+	animation: fadein 1s;
+	-webkit-animation: fadein 1s;
+}
+
+#TYPO3Review_1447791881_status .fadeOut,
 #TYPO3Review_1447791881.fadeOut {
 	animation: fadeout 1s;
 	-webkit-animation: fadeout 1s;
 }
 
+#TYPO3Review_1447791881_status .fadeOutFast,
 #TYPO3Review_1447791881.fadeOutFast {
 	animation: fadeout 0.3s;
 	-webkit-animation: fadeout 0.3s;

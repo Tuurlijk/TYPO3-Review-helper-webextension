@@ -86,6 +86,31 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Fade out infoBox and remove after 1 second
+     *
+     * @return {*}  Not defined.
+     */
+    function fadeOutStatusMessage(id) {
+        document.getElementById(id).classList.remove('fadeIn');
+        document.getElementById(id).classList.add('fadeOut');
+        var timer = new Timer(
+            function () {
+                removeStatusMessage(id);
+            },
+            1000
+        );
+    }
+
+    /**
+     * Remove infoBox
+     *
+     * @return {*}  Not defined.
+     */
+    function removeStatusMessage(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    /**
      * Gen the number of objects within an object
      *
      * @since 1.0.0
@@ -103,6 +128,30 @@ var TYPO3Review_1447791881 = (function () {
             }
         }
         return length;
+    }
+
+    /**
+     * Pauseable Timer
+     *
+     * @param  {object} callback  The callback object.
+     * @param  {int} delay  The delay.
+     * @this   {Timer}  A Timer.
+     * @return {*}  Not defined.
+     */
+    function Timer(callback, delay) {
+        var timerId, start, remaining = delay;
+
+        this.pause = function () {
+            window.clearTimeout(timerId);
+            remaining -= new Date() - start;
+        };
+
+        this.resume = function () {
+            start = new Date();
+            timerId = window.setTimeout(callback, remaining);
+        };
+
+        this.resume();
     }
 
     /**
@@ -509,11 +558,11 @@ var TYPO3Review_1447791881 = (function () {
                     if (xhr.status === 200) {
                         createReviewButtons(xhr.responseText, revision);
                         document.getElementById(prefix + 'loading').className = 'hide';
+                    } else {
+                        publicMethods.addStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
                     }
                 }
             };
-            xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
-            ;
         },
 
         /*
@@ -577,7 +626,8 @@ var TYPO3Review_1447791881 = (function () {
          * @param alternativeDocument
          */
         addStatusMessage: function (message, status, alternativeDocument) {
-            var theDocument;
+            var theDocument,
+                timers = {};
             if (alternativeDocument !== undefined) {
                 theDocument = alternativeDocument;
             } else {
@@ -600,7 +650,7 @@ var TYPO3Review_1447791881 = (function () {
 
             messageDiv.id = 'TYPO3Review_' + timestamp;
             messageDiv.innerHTML = message;
-            messageDiv.setAttribute('class', 'message status' + status);
+            messageDiv.setAttribute('class', 'message fadeIn status' + status);
 
             closeButton.id = 'TYPO3Review_' + timestamp + '_closeButton';
             closeButton.setAttribute('class', 'closeButton');
@@ -616,9 +666,15 @@ var TYPO3Review_1447791881 = (function () {
                 theDocument.getElementById(prefix + 'status').appendChild(messageDiv);
             }
 
+            timers.timestamp = new Timer(
+                function () {
+                    fadeOutStatusMessage(messageDiv.id);
+                },
+                10000
+            );
+
             theDocument.getElementById(messageDiv.id + '_closeButton').addEventListener('click', function () {
-                theDocument.getElementById(messageDiv.id).className = 'fadeOutFast';
-                theDocument.getElementById(messageDiv.id).style.display = 'none';
+                fadeOutStatusMessage(messageDiv.id);
             }, false);
         }
 
