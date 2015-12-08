@@ -135,8 +135,8 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
                     cmd: 'insecureResponse',
                     details: details
                 },
-                function (response) {
-                    console.log(response);
+                function () {
+                    //console.log(response);
                 }
             );
         } else {

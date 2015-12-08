@@ -138,7 +138,6 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
@@ -220,7 +219,6 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
@@ -278,7 +276,6 @@ var TYPO3Review_1447791881 = (function () {
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(parameters);
-        xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
@@ -462,7 +459,6 @@ var TYPO3Review_1447791881 = (function () {
             xhr.open('GET', apiEnd + '/version', true);
             xhr.send(null);
             xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
-            ;
             xhr.onload = function () {
                 response = JSON.parse(xhr.responseText);
                 if (response.status === 'OK') {
@@ -480,8 +476,6 @@ var TYPO3Review_1447791881 = (function () {
             var xhr = new XMLHttpRequest();
             xhr.open('HEAD', 'https://local.typo3.org/review.php', true);
             xhr.send(null);
-            xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
-            ;
             xhr.timeout = 1000;
             xhr.ontimeout = function () {
                 isReviewSiteAvailable = false;
