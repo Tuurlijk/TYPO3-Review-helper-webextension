@@ -47,6 +47,16 @@ var TYPO3Review_1447791881 = (function () {
         isReviewSiteAvailable = false;
 
     /**
+     * Clear status messages
+     *
+     * @since 1.0.0
+     *
+     */
+    function clearStatusMessages() {
+        document.getElementById(prefix + 'status').innerHTML = '';
+    }
+
+    /**
      * Create popup element
      *
      * @since 1.0.0
@@ -88,14 +98,24 @@ var TYPO3Review_1447791881 = (function () {
     /**
      * Fade out infoBox and remove after 1 second
      *
+     * @since 1.0.0
+     *
+     * @param alternativeDocument
+     *
      * @return {*}  Not defined.
      */
-    function fadeOutStatusMessage(id) {
-        document.getElementById(id).classList.remove('fadeIn');
-        document.getElementById(id).classList.add('fadeOut');
+    function fadeOutStatusMessage(id, alternativeDocument) {
+        var theDocument;
+        if (alternativeDocument !== undefined) {
+            theDocument = alternativeDocument;
+        } else {
+            theDocument = document;
+        }
+        theDocument.getElementById(id).classList.remove('fadeIn');
+        theDocument.getElementById(id).classList.add('fadeOut');
         var timer = new Timer(
             function () {
-                removeStatusMessage(id);
+                removeStatusMessage(id, alternativeDocument);
             },
             1000
         );
@@ -104,10 +124,20 @@ var TYPO3Review_1447791881 = (function () {
     /**
      * Remove infoBox
      *
+     * @since 1.0.0
+     *
+     * @param alternativeDocument
+     *
      * @return {*}  Not defined.
      */
-    function removeStatusMessage(id) {
-        document.getElementById(id).style.display = 'none';
+    function removeStatusMessage(id, alternativeDocument) {
+        var theDocument;
+        if (alternativeDocument !== undefined) {
+            theDocument = alternativeDocument;
+        } else {
+            theDocument = document;
+        }
+        theDocument.getElementById(id).style.display = 'none';
     }
 
     /**
@@ -133,6 +163,8 @@ var TYPO3Review_1447791881 = (function () {
     /**
      * Pauseable Timer
      *
+     * @since 1.0.0
+     *
      * @param  {object} callback  The callback object.
      * @param  {int} delay  The delay.
      * @this   {Timer}  A Timer.
@@ -152,6 +184,40 @@ var TYPO3Review_1447791881 = (function () {
         };
 
         this.resume();
+    }
+
+    /**
+     * Hide loading indicator
+     *
+     * @since 1.0.0
+     *
+     * @param alternativeDocument
+     */
+    function hideLoadingIndicator(alternativeDocument) {
+        var theDocument;
+        if (alternativeDocument !== undefined) {
+            theDocument = alternativeDocument;
+        } else {
+            theDocument = document;
+        }
+        theDocument.getElementById(prefix + 'loading').className = 'hide';
+    }
+
+    /**
+     * Show loading indicator
+     *
+     * @since 1.0.0
+     *
+     * @param alternativeDocument
+     */
+    function showLoadingIndicator(alternativeDocument) {
+        var theDocument;
+        if (alternativeDocument !== undefined) {
+            theDocument = alternativeDocument;
+        } else {
+            theDocument = document;
+        }
+        theDocument.getElementById(prefix + 'loading').className = 'loading';
     }
 
     /**
@@ -211,7 +277,7 @@ var TYPO3Review_1447791881 = (function () {
         var cherryPickCommand = '';
         if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
             cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
-            document.getElementById(prefix + 'loading').className = 'loading';
+            showLoadingIndicator();
             runCherryPickCommand(cherryPickCommand);
         }
         return cherryPickCommand;
@@ -262,7 +328,7 @@ var TYPO3Review_1447791881 = (function () {
      * @since 1.0.0
      */
     function resetReviewSites() {
-        document.getElementById(prefix + 'loading').className = 'loading';
+        showLoadingIndicator();
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=reset";
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
@@ -300,17 +366,19 @@ var TYPO3Review_1447791881 = (function () {
         event.target.parentElement.parentElement.style.position = 'relative';
 
         // Set the review api version
-        var promise = new Promise(function (resolve, reject) {
-            resolve(publicMethods.getApiVersion());
-        });
-        publicMethods.getReviewSiteAvailability();
-
-        if (changeDetailUrl) {
-            document.getElementById(prefix + 'loading').className = 'loading';
-            publicMethods.loadIssueDetails(changeDetailUrl, revision);
-        } else {
-            publicMethods.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound', 'error'));
-        }
+        publicMethods.detectApiVersion()
+            .then(function () {
+                if (publicMethods.getApiVersion() === 0) {
+                    return publicMethods.getReviewSiteAvailability();
+                }
+            })
+            .then(function () {
+                if (changeDetailUrl) {
+                    publicMethods.loadIssueDetails(changeDetailUrl, revision);
+                }
+            })
+            .catch(function (reason) {
+            });
     }
 
     /**
@@ -319,12 +387,11 @@ var TYPO3Review_1447791881 = (function () {
      * @since 1.0.0
      */
     function updateReviewSites() {
-        document.getElementById(prefix + 'loading').className = 'loading';
+        showLoadingIndicator();
         var xhr = new XMLHttpRequest(),
             parameters = "cmd=update";
         xhr.open('POST', 'https://local.typo3.org/review.php', true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.send(parameters);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
@@ -334,6 +401,7 @@ var TYPO3Review_1447791881 = (function () {
                 }
             }
         };
+        xhr.send(parameters);
     }
 
     /**
@@ -394,7 +462,7 @@ var TYPO3Review_1447791881 = (function () {
                 revisions.forEach(function (currentRevision) {
                     if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
                         cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
-                        document.getElementById(prefix + 'loading').className = 'loading';
+                        showLoadingIndicator();
                         runCherryPickCommand(cherryPickCommand);
                     }
                 });
@@ -440,7 +508,21 @@ var TYPO3Review_1447791881 = (function () {
                     detailUrl = parser.protocol + '//' + parser.hostname + '/changes/?q=change:' + issueNumber + '&o=ALL_REVISIONS&o=DOWNLOAD_COMMANDS';
                 }
             }
+            if (detailUrl === '') {
+                publicMethods.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound'), 'error');
+            }
             return detailUrl;
+        },
+
+        /**
+         * Get the api version
+         *
+         * @since 1.0.0
+         *
+         * @returns {string}
+         */
+        getApiVersion: function () {
+            return apiVersion;
         },
 
         /**
@@ -498,22 +580,48 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
-         * Get the API version
+         * Detect the API version
          *
          * @since 1.0.0
          */
-        getApiVersion: function () {
-            var xhr = new XMLHttpRequest(),
-                response;
-            xhr.open('GET', apiEnd + '/version', true);
-            xhr.send(null);
-            xhr.onerror = publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
-            xhr.onload = function () {
-                response = JSON.parse(xhr.responseText);
-                if (response.status === 'OK') {
-                    apiVersion = response.stdout;
-                }
-            };
+        detectApiVersion: function () {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest(),
+                    response;
+                xhr.open('GET', apiEnd + '/version', true);
+                xhr.onload = function () {
+                    if (xhr.responseText.charAt(0) === '{') {
+                        response = JSON.parse(xhr.responseText);
+                        if (response.status === 'OK') {
+                            apiVersion = response.stdout;
+                            publicMethods.addStatusMessage('API: ' + apiVersion);
+                            resolve(apiVersion);
+                        }
+                    }
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.onerror = function () {
+                    isReviewSiteAvailable = false;
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.timeout = 2000;
+                xhr.ontimeout = function () {
+                    isReviewSiteAvailable = false;
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
+            });
         },
 
         /**
@@ -522,22 +630,41 @@ var TYPO3Review_1447791881 = (function () {
          * @since 1.0.0
          */
         getReviewSiteAvailability: function () {
-            var xhr = new XMLHttpRequest();
-            xhr.open('HEAD', 'https://local.typo3.org/review.php', true);
-            xhr.send(null);
-            xhr.timeout = 1000;
-            xhr.ontimeout = function () {
-                isReviewSiteAvailable = false;
-                publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
-            };
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 0 || xhr.status === 400 || xhr.status === 404) {
-                        isReviewSiteAvailable = false;
-                        publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('HEAD', 'https://local.typo3.org/review.php', true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 0 || xhr.status === 400 || xhr.status === 404) {
+                            isReviewSiteAvailable = false;
+                            publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                        } else {
+                            isReviewSiteAvailable = true;
+                            resolve({
+                                status: this.status,
+                                statusText: xhr.statusText
+                            });
+                        }
                     }
-                }
-            };
+                };
+                xhr.onerror = function () {
+                    isReviewSiteAvailable = false;
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.timeout = 2000;
+                xhr.ontimeout = function () {
+                    isReviewSiteAvailable = false;
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
+            });
         },
 
         /**
@@ -549,20 +676,21 @@ var TYPO3Review_1447791881 = (function () {
          * @param revision
          */
         loadIssueDetails: function (url, revision) {
+            showLoadingIndicator();
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
             xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.send(null);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         createReviewButtons(xhr.responseText, revision);
-                        document.getElementById(prefix + 'loading').className = 'hide';
+                        hideLoadingIndicator();
                     } else {
                         publicMethods.addStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
                     }
                 }
             };
+            xhr.send();
         },
 
         /*
@@ -601,6 +729,7 @@ var TYPO3Review_1447791881 = (function () {
                         button.appendChild(reviewTextNode);
                         clone.addEventListener('click', function (event) {
                             event.preventDefault();
+                            clearStatusMessages();
                             showReviewPopup(event);
                         }, false);
                         parent.appendChild(clone);
@@ -609,8 +738,11 @@ var TYPO3Review_1447791881 = (function () {
                     }
                 }
                 break;
-            case 'insecureResponse':
+            case 'certificateFailure':
                 publicMethods.addStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error');
+                break;
+            case 'reviewSiteUnavailable':
+                publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
                 break;
             }
             sendResponse({});
@@ -646,7 +778,7 @@ var TYPO3Review_1447791881 = (function () {
                 status = '4xx';
             }
 
-            theDocument.getElementById(prefix + 'loading').className = 'hide';
+            hideLoadingIndicator(theDocument);
 
             messageDiv.id = 'TYPO3Review_' + timestamp;
             messageDiv.innerHTML = message;
@@ -668,13 +800,13 @@ var TYPO3Review_1447791881 = (function () {
 
             timers.timestamp = new Timer(
                 function () {
-                    fadeOutStatusMessage(messageDiv.id);
+                    fadeOutStatusMessage(messageDiv.id, alternativeDocument);
                 },
-                10000
+                15000
             );
 
             theDocument.getElementById(messageDiv.id + '_closeButton').addEventListener('click', function () {
-                fadeOutStatusMessage(messageDiv.id);
+                fadeOutStatusMessage(messageDiv.id, alternativeDocument);
             }, false);
         }
 

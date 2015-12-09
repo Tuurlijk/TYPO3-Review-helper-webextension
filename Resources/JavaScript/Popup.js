@@ -19,14 +19,18 @@ document.addEventListener('DOMContentLoaded', function () {
         var url = t3Review.getChangeDetailUrl(tabs[0].url),
             revision = t3Review.getRevision(tabs[0].url);
 
-        t3Review.getReviewSiteAvailability();
-        t3Review.getApiVersion();
-
-        if (url) {
-            document.getElementById(prefix + 'loading').className = 'loading';
-            t3Review.loadIssueDetails(url, revision);
-        } else {
-            t3Review.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound'), 'error');
-        }
+        t3Review.detectApiVersion()
+            .then(function () {
+                if (t3Review.getApiVersion() === 0) {
+                    return t3Review.getReviewSiteAvailability();
+                }
+            })
+            .then(function () {
+                if (url) {
+                    t3Review.loadIssueDetails(url, revision);
+                }
+            })
+            .catch(function (reason) {
+            });
     });
 });

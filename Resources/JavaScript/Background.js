@@ -132,7 +132,7 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
             chrome.tabs.sendMessage(
                 details.tabId,
                 {
-                    cmd: 'insecureResponse',
+                    cmd: 'certificateFailure',
                     details: details
                 },
                 function () {
@@ -146,6 +146,27 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
             }
         }
     }
+    if (details.error === 'net::ERR_ADDRESS_UNREACHABLE') {
+        var i, views;
+        if (details.tabId > 0) {
+            chrome.tabs.sendMessage(
+                details.tabId,
+                {
+                    cmd: 'reviewSiteUnavailable',
+                    details: details
+                },
+                function () {
+                    //console.log(response);
+                }
+            );
+        } else {
+            views = chrome.extension.getViews({type: 'popup'});
+            for (i = 0; i < views.length; i = i + 1) {
+                TYPO3Review_1447791881.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error', views[i].document);
+            }
+        }
+    }
+
 }, {
     urls: ['*://*.local.typo3.org/*'],
     types: ['xmlhttprequest']

@@ -134,6 +134,7 @@
 }
 
 #TYPO3Review_1447791881_status .message {
+	background-color: #f8f8f8;
 	position: relative;
 	border: 1px solid #c2c2c2;
 	padding: 0.4em;
