@@ -349,6 +349,24 @@
 	background-repeat: no-repeat;
 }
 
+:disabled:-webkit-any(
+    #TYPO3Review_1447791881 button,
+    #TYPO3Review_1447791881 input[type='button'],
+    #TYPO3Review_1447791881 input[type='submit']):not(#TYPO3Review_1447791881 .custom-appearance),
+#TYPO3Review_1447791881 select:disabled {
+	background-image: -webkit-linear-gradient(#f1f1f1, #f1f1f1 38%, #e6e6e6);
+	border-color: rgba(80, 80, 80, 0.2);
+	box-shadow: 0 1px 0 rgba(80, 80, 80, 0.08),
+	inset 0 1px 2px rgba(255, 255, 255, 0.75);
+	color: #aaa;
+}
+
+#TYPO3Review_1447791881 select:disabled {
+	/* OVERRIDE */
+	background-image: -webkit-image-set(url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAICAQAAACxSAwfAAAASklEQVQY02P4z0AMRGZGMaShwCisyhITG/4jw8RErMr+KyxYiFC0YOF/BeyWIikEKWLA4Ta4QogiPMpACt82QRThVQYUYYWz4BAAGr6Ii6kEPacAAAAASUVORK5CYII=) 1x, url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAQCAQAAADQF8WVAAAARElEQVR4Xu3MsQ0AIAwEsYx+m4fySsgLOuTe1Re9z4De4DzbdVDnmZ0ENcrsZJVkdoIKMzurMLOzSjNhlWfCapBlfpZbeMFeGdxKIEQAAAAASUVORK5CYII=) 2x),
+	-webkit-linear-gradient(#f1f1f1, #f1f1f1 38%, #e6e6e6);
+}
+
 #TYPO3Review_1447791881 .settings-row {
 	display: block;
 	margin: 0.65em 0;

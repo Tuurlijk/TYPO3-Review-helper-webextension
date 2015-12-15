@@ -2,7 +2,7 @@
  latedef:true, noarg:true, noempty:true, nonew:true, undef:true, maxlen:256,
  strict:true, trailing:true, boss:true, browser:true, devel:true, jquery:true */
 /*jslint plusplus:true, nomen:true, browser:true*/
-/*global chrome, safari, SAFARI, openTab, Ember, DS, console, alert */
+/*global chrome, openTab, DS, console, alert, localStorage */
 
 var TYPO3Review_1447791881 = (function () {
     'use strict';
@@ -109,6 +109,58 @@ var TYPO3Review_1447791881 = (function () {
             document.getElementById('TYPO3Review_1447791881').style.visibility = 'hidden';
         }, false);
 
+    }
+
+    /**
+     * Get preferred repository
+     *
+     * @since 1.0.0
+     *
+     * @param repositories
+     *
+     * @return {string}
+     */
+    function getPreferredRepository(repositories) {
+        var preferredRepository = '';
+        if (localStorage) {
+            if (localStorage.preferredRepository) {
+                preferredRepository = localStorage.preferredRepository;
+            }
+        }
+        if (preferredRepository === '') {
+            if (repositories.indexOf('typo3_src') > -1) {
+                preferredRepository = 'typo3_src';
+            } else {
+                preferredRepository = repositories[0];
+            }
+        }
+        return preferredRepository;
+    }
+
+    /**
+     * Get preferred review site
+     *
+     * @since 1.0.0
+     *
+     * @param sites
+     *
+     * @return {string}
+     */
+    function getPreferredReviewSite(sites) {
+        var preferredReviewSite = '';
+        if (localStorage) {
+            if (localStorage.preferredReviewSite) {
+                preferredReviewSite = localStorage.preferredReviewSite;
+            }
+        }
+        if (preferredReviewSite === '') {
+            if (sites.indexOf('review.local.typo3.org') > -1) {
+                preferredReviewSite = 'review.local.typo3.org';
+            } else {
+                preferredReviewSite = sites[0];
+            }
+        }
+        return preferredReviewSite;
     }
 
     /**
@@ -503,6 +555,36 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
+         * Create repository selector
+         *
+         * @since 1.0.0
+         *
+         * @param items
+         */
+        createRepositorySelector: function (items) {
+            if (items.length === 0) {
+                items[0] = 'No repositories found';
+            }
+
+            showLoadingIndicator();
+            var select = '<select name="site">',
+                preferredRepository = getPreferredRepository(items),
+                selected = '';
+            items.forEach(function (item) {
+                if (item === preferredRepository) {
+                    selected = 'selected';
+                } else {
+                    selected = '';
+                }
+                select += '<option value="' + item + '" ' + selected + '>' + item + '</option>';
+            });
+            select += '</select><br/>';
+
+            document.querySelector(prefixId + ' .repositorySelector').innerHTML = select;
+            hideLoadingIndicator();
+        },
+
+        /**
          * Create review selector
          *
          * @since 1.0.0
@@ -546,18 +628,34 @@ var TYPO3Review_1447791881 = (function () {
          *
          * @since 1.0.0
          *
-         * @param sites
+         * @param items
          */
-        createSiteSelector: function (sites) {
-            showLoadingIndicator();
-            var allRevisionButtons = '<select name="site">';
-            sites.forEach(function (site) {
-                allRevisionButtons += '<option value="' + site + '">' + site + '</option>';
-            });
-            allRevisionButtons += '</select><br/>';
+        createSiteSelector: function (items) {
+            return new Promise(function (resolve, reject) {
+                showLoadingIndicator();
+                var select = '<select name="item">',
+                    preferredSite = getPreferredReviewSite(items),
+                    selected = '';
+                items.forEach(function (item) {
+                    if (item === preferredSite) {
+                        selected = 'selected';
+                    } else {
+                        selected = '';
+                    }
+                    select += '<option value="' + item + '" ' + selected + '>' + item + '</option>';
+                });
+                select += '</select><br/>';
 
-            document.querySelector(prefixId + ' .siteSelector').innerHTML = allRevisionButtons;
-            hideLoadingIndicator();
+                document.querySelector(prefixId + ' .siteSelector').innerHTML = select;
+                document.querySelector(prefixId + ' .siteSelector select').addEventListener('change', function () {
+                    publicMethods.getGitRepositories(this.value)
+                        .then(function (gitRepositories) {
+                            publicMethods.createRepositorySelector(gitRepositories);
+                        });
+                });
+                hideLoadingIndicator();
+                resolve(preferredSite);
+            });
         },
 
         /**
@@ -717,6 +815,44 @@ var TYPO3Review_1447791881 = (function () {
                     isReviewSiteAvailable = false;
                     publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
                     resolve({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
+            });
+        },
+
+        /**
+         * Get Git repositories
+         *
+         * @param site
+         *
+         * @since 1.0.0
+         */
+        getGitRepositories: function (site) {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest(),
+                    response;
+                xhr.open('GET', apiEnd + '/git/list/' + site, true);
+                xhr.onload = function () {
+                    response = JSON.parse(xhr.response);
+                    if (response.status === 'OK') {
+                        if (response.stdout === undefined) {
+                            console.log('returning empty array');
+                            resolve([]);
+                        } else {
+                            resolve(response.stdout);
+                        }
+                    } else {
+                        reject({
+                            status: response.status,
+                            statusText: response.stderr
+                        });
+                    }
+                };
+                xhr.onerror = function () {
+                    reject({
                         status: this.status,
                         statusText: xhr.statusText
                     });

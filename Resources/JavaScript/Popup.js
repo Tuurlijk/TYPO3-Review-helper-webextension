@@ -43,9 +43,15 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function (sites) {
                 if (sites.length > 0) {
                     t3Review.showChangeInformation();
-                    t3Review.createSiteSelector(sites);
                     t3Review.createReviewSelector(t3Review.getIssueDetails(), revision);
+                    return t3Review.createSiteSelector(sites);
                 }
+            })
+            .then(function (preferredSite) {
+                return t3Review.getGitRepositories(preferredSite);
+            })
+            .then(function (gitRepositories) {
+                t3Review.createRepositorySelector(gitRepositories);
             })
             .catch(function () {
             });
