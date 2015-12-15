@@ -24,6 +24,15 @@ var TYPO3Review_1447791881 = (function () {
         prefix = 'TYPO3Review_1447791881_',
 
         /**
+         * ID prefix used to uniquely target elements in content script
+         *
+         * @since 1.0.0
+         *
+         * @type {string}
+         */
+        prefixId = '#TYPO3Review_1447791881',
+
+        /**
          * API endpoint
          *
          * @since 1.0.0
@@ -44,7 +53,14 @@ var TYPO3Review_1447791881 = (function () {
          *
          * @since 1.0.0
          */
-        isReviewSiteAvailable = false;
+        isReviewSiteAvailable = false,
+
+        /**
+         * Issue details
+         *
+         * @since 1.0.0
+         */
+        issueDetails;
 
     /**
      * Clear status messages
@@ -200,7 +216,7 @@ var TYPO3Review_1447791881 = (function () {
         } else {
             theDocument = document;
         }
-        theDocument.getElementById(prefix + 'loading').className = 'hide';
+        theDocument.querySelector(prefixId + ' .loading').classList.add('hide');
     }
 
     /**
@@ -217,7 +233,7 @@ var TYPO3Review_1447791881 = (function () {
         } else {
             theDocument = document;
         }
-        theDocument.getElementById(prefix + 'loading').className = 'loading';
+        theDocument.querySelector(prefixId + ' .loading').classList.remove('hide');
     }
 
     /**
@@ -346,6 +362,16 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Un-hide api markup in template
+     *
+     * @param apiVersion
+     */
+    function showApiMarkup(apiVersion) {
+        apiVersion = apiVersion.replace(/\./g, '-');
+        document.querySelector(prefixId + ' .api-v' + apiVersion).classList.remove('hide');
+    }
+
+    /**
      * Show review popup
      *
      * @since 1.0.0
@@ -368,12 +394,15 @@ var TYPO3Review_1447791881 = (function () {
         // Set the review api version
         publicMethods.detectApiVersion()
             .then(function () {
-                if (publicMethods.getApiVersion() === 0) {
+                if (publicMethods.getApiVersion() > 0) {
+
+                } else {
                     return publicMethods.getReviewSiteAvailability();
                 }
             })
-            .then(function () {
-                if (changeDetailUrl) {
+            .then(function (result) {
+                console.log(result);
+                if (changeDetailUrl && result !== undefined) {
                     publicMethods.loadIssueDetails(changeDetailUrl, revision);
                 }
             })
@@ -404,76 +433,132 @@ var TYPO3Review_1447791881 = (function () {
         xhr.send(parameters);
     }
 
-    /**
-     * Create review buttons
-     *
-     * @since 1.0.0
-     *
-     * @param responseText
-     * @param revision
-     */
-    function createReviewButtons(responseText, revision) {
-        if (responseText.startsWith(')]}\'')) {
-            responseText = responseText.substr(4);
-        }
-
-        var response = JSON.parse(responseText),
-            revisions,
-            allRevisions,
-            cherryPickCommand = '',
-            allRevisionButtons = '',
-            m,
-            n,
-            resetButton,
-            updateButton;
-
-        if (revision === 'latest' || '') {
-            revision = objectLength(response[0].revisions);
-        }
-        revisions = Object.keys(response[0].revisions).map(function (key) {
-            return response[0].revisions[key];
-        });
-        revisions.forEach(function (currentRevision) {
-            if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
-                cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
-                if (cherryPickCommand !== '') {
-                    document.getElementById(prefix + 'currentRevision').innerHTML = '<input class="' + prefix + 'revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
-                } else {
-                    alert('doh! No cherry pick command found.');
-                }
-            }
-        });
-        revisions.sort(sortObjectArrayByRevision);
-
-        revisions.forEach(function (currentRevision) {
-            if (parseInt(currentRevision._number, 10) !== parseInt(revision, 10)) {
-                cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
-                if (cherryPickCommand !== '') {
-                    allRevisionButtons += '<input type="button" class="' + prefix + 'revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '"><br/>';
-                } else {
-                    alert('doh! No cherry pick command found.');
-                }
-            }
-        });
-        document.getElementById(prefix + 'allRevisions').innerHTML = allRevisionButtons;
-        allRevisions = document.getElementsByClassName(prefix + 'revisionButton');
-        for (m = 0, n = allRevisions.length; m < n; ++m) {
-            allRevisions[m].addEventListener('click', function (event) {
-                revisions.forEach(function (currentRevision) {
-                    if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
-                        cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
-                        showLoadingIndicator();
-                        runCherryPickCommand(cherryPickCommand);
-                    }
-                });
-            }, false);
-        }
-        document.getElementById(prefix + 'resetButton').addEventListener('click', resetReviewSites, false);
-        document.getElementById(prefix + 'updateButton').addEventListener('click', updateReviewSites, false);
-        document.getElementById(prefix + 'openReviewSitesButton').addEventListener('click', openReviewSites, false);
-    }
-
     var publicMethods = {
+
+        /**
+         * Create review buttons
+         *
+         * @since 1.0.0
+         *
+         * @param responseText
+         * @param revision
+         */
+        createReviewButtons: function (responseText, revision) {
+            var response = responseText,
+                revisions,
+                allRevisions,
+                cherryPickCommand = '',
+                allRevisionButtons = '',
+                m,
+                n,
+                resetButton,
+                updateButton;
+
+            showLoadingIndicator();
+            if (revision === 'latest' || '') {
+                revision = objectLength(response[0].revisions);
+            }
+            revisions = Object.keys(response[0].revisions).map(function (key) {
+                return response[0].revisions[key];
+            });
+            revisions.forEach(function (currentRevision) {
+                if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
+                    cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
+                    if (cherryPickCommand !== '') {
+                        document.getElementById(prefix + 'currentRevision').innerHTML = '<input class="' + prefix + 'revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
+                    } else {
+                        alert('doh! No cherry pick command found.');
+                    }
+                }
+            });
+            revisions.sort(sortObjectArrayByRevision);
+
+            revisions.forEach(function (currentRevision) {
+                if (parseInt(currentRevision._number, 10) !== parseInt(revision, 10)) {
+                    cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
+                    if (cherryPickCommand !== '') {
+                        allRevisionButtons += '<input type="button" class="' + prefix + 'revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '"><br/>';
+                    } else {
+                        alert('doh! No cherry pick command found.');
+                    }
+                }
+            });
+            document.getElementById(prefix + 'allRevisions').innerHTML = allRevisionButtons;
+            allRevisions = document.getElementsByClassName(prefix + 'revisionButton');
+            for (m = 0, n = allRevisions.length; m < n; ++m) {
+                allRevisions[m].addEventListener('click', function (event) {
+                    revisions.forEach(function (currentRevision) {
+                        if (parseInt(currentRevision._number, 10) === parseInt(event.target.dataset.revision, 10)) {
+                            cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
+                            showLoadingIndicator();
+                            runCherryPickCommand(cherryPickCommand);
+                        }
+                    });
+                }, false);
+            }
+            document.getElementById(prefix + 'resetButton').addEventListener('click', resetReviewSites, false);
+            document.getElementById(prefix + 'updateButton').addEventListener('click', updateReviewSites, false);
+            document.getElementById(prefix + 'openReviewSitesButton').addEventListener('click', openReviewSites, false);
+            hideLoadingIndicator();
+        },
+
+        /**
+         * Create review selector
+         *
+         * @since 1.0.0
+         *
+         * @param response
+         * @param revision
+         */
+        createReviewSelector: function (response, revision) {
+            showLoadingIndicator();
+            var revisions,
+                selected = '',
+                cherryPickCommand = '',
+                revisionOptions = '<select name="revision">';
+
+            if (revision === 'latest' || '') {
+                revision = objectLength(response[0].revisions);
+            }
+            revisions = Object.keys(response[0].revisions).map(function (key) {
+                return response[0].revisions[key];
+            });
+            revisions.sort(sortObjectArrayByRevision);
+            revisions.forEach(function (currentRevision) {
+                if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
+                    selected = 'selected';
+                } else {
+                    selected = '';
+                }
+                cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
+                if (cherryPickCommand !== '') {
+                    revisionOptions += '<option value="' + currentRevision._number + '" ' + selected + '>Cherry Pick revision ' + currentRevision._number + '</option>';
+                }
+            });
+            revisionOptions += '</select><br/>';
+
+            document.querySelector(prefixId + ' .reviewSelector').innerHTML = revisionOptions;
+            hideLoadingIndicator();
+        },
+
+        /**
+         * Create site pulldown
+         *
+         * @since 1.0.0
+         *
+         * @param sites
+         */
+        createSiteSelector: function (sites) {
+            showLoadingIndicator();
+            var allRevisionButtons = '<select name="site">';
+            sites.forEach(function (site) {
+                allRevisionButtons += '<option value="' + site + '">' + site + '</option>';
+            });
+            allRevisionButtons += '</select><br/>';
+
+            document.querySelector(prefixId + ' .siteSelector').innerHTML = allRevisionButtons;
+            hideLoadingIndicator();
+        },
 
         /**
          * Get the change detail url
@@ -523,6 +608,17 @@ var TYPO3Review_1447791881 = (function () {
          */
         getApiVersion: function () {
             return apiVersion;
+        },
+
+        /**
+         * Get issue details
+         *
+         * @since 1.0.0
+         *
+         * @returns {object}
+         */
+        getIssueDetails: function () {
+            return issueDetails;
         },
 
         /**
@@ -582,6 +678,8 @@ var TYPO3Review_1447791881 = (function () {
         /**
          * Detect the API version
          *
+         * Promise is always resolved so we can try a fallback script
+         *
          * @since 1.0.0
          */
         detectApiVersion: function () {
@@ -594,19 +692,22 @@ var TYPO3Review_1447791881 = (function () {
                         response = JSON.parse(xhr.responseText);
                         if (response.status === 'OK') {
                             apiVersion = response.stdout;
-                            publicMethods.addStatusMessage('API: ' + apiVersion);
+                            //publicMethods.addStatusMessage('API: ' + apiVersion);
+                            showApiMarkup(apiVersion);
                             resolve(apiVersion);
                         }
                     }
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
-                    reject({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    });
+                    else {
+                        publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+                        resolve({
+                            status: this.status,
+                            statusText: xhr.statusText
+                        });
+                    }
                 };
                 xhr.onerror = function () {
                     isReviewSiteAvailable = false;
-                    reject({
+                    resolve({
                         status: this.status,
                         statusText: xhr.statusText
                     });
@@ -615,7 +716,7 @@ var TYPO3Review_1447791881 = (function () {
                 xhr.ontimeout = function () {
                     isReviewSiteAvailable = false;
                     publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
-                    reject({
+                    resolve({
                         status: this.status,
                         statusText: xhr.statusText
                     });
@@ -638,6 +739,10 @@ var TYPO3Review_1447791881 = (function () {
                         if (xhr.status === 0 || xhr.status === 400 || xhr.status === 404) {
                             isReviewSiteAvailable = false;
                             publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                            reject({
+                                status: this.status,
+                                statusText: xhr.statusText
+                            });
                         } else {
                             isReviewSiteAvailable = true;
                             resolve({
@@ -668,29 +773,84 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
+         * Get TYPO3 sites
+         *
+         * @since 1.0.0
+         */
+        getTypo3Sites: function () {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest(),
+                    response;
+                xhr.open('GET', apiEnd + '/site/list', true);
+                xhr.onload = function () {
+                    response = JSON.parse(xhr.response);
+                    if (response.status === 'OK') {
+                        resolve(response.stdout);
+                    } else {
+                        reject({
+                            status: response.status,
+                            statusText: response.stderr
+                        });
+                    }
+                };
+                xhr.onerror = function () {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
+            });
+        },
+
+        /**
          * Load the details for a certains issue
          *
          * @since 1.0.0
          *
          * @param url
-         * @param revision
          */
-        loadIssueDetails: function (url, revision) {
-            showLoadingIndicator();
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        createReviewButtons(xhr.responseText, revision);
-                        hideLoadingIndicator();
-                    } else {
-                        publicMethods.addStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
+        loadIssueDetails: function (url) {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest(),
+                    responseText;
+                xhr.open('GET', url, true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            if (xhr.responseText.startsWith(')]}\'')) {
+                                responseText = xhr.responseText.substr(4);
+                            }
+                            issueDetails = JSON.parse(responseText);
+                            resolve(issueDetails);
+                        } else {
+                            reject({
+                                status: this.status,
+                                statusText: xhr.statusText
+                            });
+                            publicMethods.addStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
+                        }
                     }
-                }
-            };
-            xhr.send();
+                };
+                xhr.send();
+            });
+        },
+
+        /**
+         * Show change information
+         *
+         * @since 1.0.0
+         *
+         */
+        showChangeInformation: function () {
+            var change = publicMethods.getIssueDetails()[0];
+            document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.subject;
+            document.querySelector(prefixId + ' .changeInformation .project').innerText = change.project;
+            document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.branch;
+            document.querySelector(prefixId + ' .changeInformation .canMerge').innerText = change.mergeable;
+            document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
+            document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
         },
 
         /*
@@ -789,13 +949,13 @@ var TYPO3Review_1447791881 = (function () {
             closeButton.innerText = '✖';
             messageDiv.appendChild(closeButton);
 
-            if (theDocument.getElementById(prefix + 'status').firstChild) {
-                theDocument.getElementById(prefix + 'status').insertBefore(
+            if (theDocument.querySelector(prefixId + ' .status').firstChild) {
+                theDocument.querySelector(prefixId + ' .status').insertBefore(
                     messageDiv,
-                    theDocument.getElementById(prefix + 'status').firstChild
+                    theDocument.querySelector(prefixId + ' .status').firstChild
                 );
             } else {
-                theDocument.getElementById(prefix + 'status').appendChild(messageDiv);
+                theDocument.querySelector(prefixId + ' .status').appendChild(messageDiv);
             }
 
             timers.timestamp = new Timer(

@@ -4,4 +4,14 @@ General:
 Done:
 ✔ All the rest ;-)
 
+get api version
+	then
+		if api version > 0
+			create new api menu
+		else
+			check for review script
+				then
+					if review script
+						create old api menu
+
 ★

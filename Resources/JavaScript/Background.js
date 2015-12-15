@@ -26,7 +26,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
             image = 'ToolbarIconDisabled';
 
         if (status === 1) {
-            title = 'Review this patch in http://review.local.typo3.org/';
+            title = 'Review this change';
             image = 'ToolbarIcon';
         }
 
@@ -126,8 +126,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
  */
 chrome.webRequest.onErrorOccurred.addListener(function (details) {
     'use strict';
+    var i, views;
     if (details.error === 'net::ERR_INSECURE_RESPONSE') {
-        var i, views;
         if (details.tabId > 0) {
             chrome.tabs.sendMessage(
                 details.tabId,
@@ -147,7 +147,6 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
         }
     }
     if (details.error === 'net::ERR_ADDRESS_UNREACHABLE') {
-        var i, views;
         if (details.tabId > 0) {
             chrome.tabs.sendMessage(
                 details.tabId,
@@ -194,7 +193,7 @@ chrome.runtime.onMessage.addListener(
                 'index': request.index,
                 'active': false
             });
-            response = "ok";
+            response = 'ok';
             sendResponse(response);
         }
     }

@@ -15,7 +15,6 @@
 	font: 11px 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
 	height: auto !important;
 	margin: 0 !important;
-	padding: 0 !important;
 	text-align: left !important;
 	text-shadow: none !important;
 	text-transform: none !important;
@@ -24,7 +23,7 @@
 }
 
 #TYPO3Review_1447791881 table {
-	width: 500px !important;
+	width: 80% !important;
 	overflow-x: scroll !important;
 	border-collapse: collapse !important;
 }
@@ -49,6 +48,7 @@
 	animation: fadein 1s;
 	-webkit-animation: fadein 1s;
 	z-index: 2147483647 !important;
+	padding: 0.4em;
 }
 
 #TYPO3Review_1447791881 .normalMode {
@@ -70,25 +70,25 @@
 	width: 220px !important;
 }
 
-#TYPO3Review_1447791881_status .fadeIn,
+#TYPO3Review_1447791881 .status .fadeIn,
 #TYPO3Review_1447791881.fadeIn {
 	animation: fadein 1s;
 	-webkit-animation: fadein 1s;
 }
 
-#TYPO3Review_1447791881_status .fadeOut,
+#TYPO3Review_1447791881 .status .fadeOut,
 #TYPO3Review_1447791881.fadeOut {
 	animation: fadeout 1s;
 	-webkit-animation: fadeout 1s;
 }
 
-#TYPO3Review_1447791881_status .fadeOutFast,
+#TYPO3Review_1447791881 .status .fadeOutFast,
 #TYPO3Review_1447791881.fadeOutFast {
 	animation: fadeout 0.3s;
 	-webkit-animation: fadeout 0.3s;
 }
 
-#TYPO3Review_1447791881_status .closeButton,
+#TYPO3Review_1447791881 .status .closeButton,
 #TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton,
 #TYPO3Review_1447791881 .sectionTitle,
 #TYPO3Review_1447791881 .key {
@@ -101,7 +101,7 @@
 
 #TYPO3Review_1447791881 .url a,
 #TYPO3Review_1447791881 .sectionTitle,
-#TYPO3Review_1447791881_status .closeButton:hover,
+#TYPO3Review_1447791881 .status .closeButton:hover,
 #TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton:hover,
 #TYPO3Review_1447791881 .key:hover {
 	color: rgb(50, 50, 50) !important;
@@ -133,7 +133,7 @@
 	-webkit-user-select: none !important;
 }
 
-#TYPO3Review_1447791881_status .message {
+#TYPO3Review_1447791881 .status .message {
 	background-color: #f8f8f8;
 	position: relative;
 	border: 1px solid #c2c2c2;
@@ -141,17 +141,17 @@
 	margin: 0.25em 0;
 }
 
-#TYPO3Review_1447791881_status .message.status2xx {
+#TYPO3Review_1447791881 .status .message.status2xx {
 	border: 1px solid rgba(0, 125, 0, 0.25);
 	border-left: 2px solid #00aa00;
 }
 
-#TYPO3Review_1447791881_status .message.status4xx {
+#TYPO3Review_1447791881 .status .message.status4xx {
 	border: 1px solid rgba(125, 0, 0, 0.25);
 	border-left: 2px solid #c60000;
 }
 
-#TYPO3Review_1447791881_status .closeButton,
+#TYPO3Review_1447791881 .status .closeButton,
 #TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton {
 	cursor: pointer !important;
 	position: absolute !important;
@@ -314,6 +314,53 @@
 
 #TYPO3Review_1447791881 .buttons {
 	text-align: center;
+}
+
+#TYPO3Review_1447791881 select,
+#TYPO3Review_1447791881 input[type='checkbox'],
+#TYPO3Review_1447791881 input[type='radio'] {
+	-webkit-appearance: none;
+	-webkit-user-select: none;
+	background-image: -webkit-linear-gradient(#ededed, #ededed 38%, #dedede);
+	border: 1px solid rgba(0, 0, 0, 0.25);
+	border-radius: 2px;
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08),
+	inset 0 1px 2px rgba(255, 255, 255, 0.75);
+	color: #444;
+	font: inherit;
+	margin: 0 1px 0 0;
+	outline: none;
+	text-shadow: 0 1px 0 rgb(240, 240, 240);
+}
+
+#TYPO3Review_1447791881 select {
+	min-height: 2em;
+	min-width: 80%;
+}
+
+#TYPO3Review_1447791881 select {
+	-webkit-appearance: none;
+	-webkit-padding-end: 20px;
+	-webkit-padding-start: 6px;
+	/* OVERRIDE */
+	background-image: -webkit-image-set(url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAICAQAAACxSAwfAAAAUklEQVQY02P4z0AMRGZGMaShwCisyhITmb8huMzfEhOxKvuvsGAh208Ik+3ngoX/FbBbClcIUcSAw21QhXxfIIrwKAMpfNsEUYRXGVCEFc6CQwBqq4CCCtU4VgAAAABJRU5ErkJggg==) 1x, url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACcAAAAQCAQAAAA/1a6rAAAAQUlEQVR4Xu3MsQnAMBAEMI1+myf9gw0+3ASCenmu+mQn2yGn3S4Mp906DEW3CEPfzTD03QxD380w3OmIUHe9v+u9QwAt93yns5cAAAAASUVORK5CYII=) 2x),
+	-webkit-linear-gradient(#ededed, #ededed 38%, #dedede);
+	background-position: right center;
+	background-repeat: no-repeat;
+}
+
+#TYPO3Review_1447791881 .settings-row {
+	display: block;
+	margin: 0.65em 0;
+	text-align: center;
+}
+
+#TYPO3Review_1447791881 h3 {
+	font-size: 1.2em;
+	margin-bottom: 0.8em;
+	color: rgba(100, 100, 100, 0.80);
+	text-shadow: 1px 1px 1px white, 0 0 0 black, 1px 1px 1px white;
+	white-space: nowrap;
 }
 
 #TYPO3Review_1447791881 .hide {

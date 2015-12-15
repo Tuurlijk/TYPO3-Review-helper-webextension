@@ -6,10 +6,9 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
-    var t3Review = TYPO3Review_1447791881,
-        prefix = t3Review.getPrefix();
+    var t3Review = TYPO3Review_1447791881;
 
-    document.getElementById(prefix + 'extensionName').innerText = chrome.i18n.getMessage('extensionName');
+    document.querySelector('#TYPO3Review_1447791881 .extensionName').innerText = chrome.i18n.getMessage('extensionName');
 
     // Query for the active tab...
     chrome.tabs.query({
@@ -23,14 +22,32 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(function () {
                 if (t3Review.getApiVersion() === 0) {
                     return t3Review.getReviewSiteAvailability();
+                } else {
+                    return {status: true};
                 }
             })
-            .then(function () {
-                if (url) {
-                    t3Review.loadIssueDetails(url, revision);
+            .then(function (result) {
+                if (url && result !== undefined) {
+                    return t3Review.loadIssueDetails(url);
+                } else {
+                    reject();
                 }
             })
-            .catch(function (reason) {
+            .then(function (issueDetails) {
+                if (t3Review.getApiVersion() === 0) {
+                    t3Review.createReviewButtons(issueDetails, revision);
+                } else {
+                    return t3Review.getTypo3Sites();
+                }
+            })
+            .then(function (sites) {
+                if (sites.length > 0) {
+                    t3Review.showChangeInformation();
+                    t3Review.createSiteSelector(sites);
+                    t3Review.createReviewSelector(t3Review.getIssueDetails(), revision);
+                }
+            })
+            .catch(function () {
             });
     });
 });

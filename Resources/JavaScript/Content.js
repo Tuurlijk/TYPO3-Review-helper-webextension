@@ -4,9 +4,7 @@
 /*jslint browser:true */
 /*global chrome, TYPO3Review_1447791881, console */
 
-var t3Review_1447791881 = TYPO3Review_1447791881;
-
-chrome.runtime.onMessage.addListener(t3Review_1447791881.contentMessageListener);
+chrome.runtime.onMessage.addListener(TYPO3Review_1447791881.contentMessageListener);
 
 chrome.runtime.sendMessage(
     {
@@ -15,6 +13,6 @@ chrome.runtime.sendMessage(
     },
     function (response) {
         'use strict';
-        t3Review_1447791881.setActiveTabId(response);
+        TYPO3Review_1447791881.setActiveTabId(response);
     }
 );
