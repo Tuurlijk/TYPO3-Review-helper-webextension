@@ -112,6 +112,83 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Execute git reset command
+     *
+     * @since 1.0.0
+     *
+     * @param data
+     */
+    function executeGitReset(data) {
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest(),
+                response;
+            xhr.open('GET', apiEnd + '/git/reset/' + data.site + '/' + data.repository, true);
+            xhr.onload = function () {
+                response = JSON.parse(xhr.response);
+                if (response.status === 'OK') {
+                    resolve({
+                        status: response.status,
+                        stdout: response.stdout,
+                        stderr: response.stderr
+                    });
+                } else {
+                    reject({
+                        status: response.status,
+                        stderr: response.stderr,
+                        stdout: response.stdout
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        });
+    }
+
+    /**
+     * Execute git cherry pick command
+     *
+     * @since 1.0.0
+     *
+     * @param data
+     */
+    function executeGitCherryPick(data) {
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest(),
+                parameters = '?change=' + encodeURIComponent(data.change) + '&fetchUrl=' + encodeURIComponent(data.fetchUrl),
+                response;
+            xhr.open('GET', apiEnd + '/git/pick/' + data.site + '/' + data.repository + parameters, true);
+            xhr.onload = function () {
+                response = JSON.parse(xhr.response);
+                if (response.status === 'OK') {
+                    resolve({
+                        status: response.status,
+                        stdout: response.stdout,
+                        stderr: response.stderr
+                    });
+                } else {
+                    reject({
+                        status: response.status,
+                        stderr: response.stderr,
+                        stdout: response.stdout
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        });
+    }
+
+    /**
      * Get preferred repository
      *
      * @since 1.0.0
@@ -313,7 +390,7 @@ var TYPO3Review_1447791881 = (function () {
     /**
      * Reset and update are also possible cmd values
      *
-     * @since 1.0.0
+     * @since 0.0.0
      *
      * @param cherryPickCommand
      */
@@ -951,27 +1028,51 @@ var TYPO3Review_1447791881 = (function () {
          */
         listenForCherryPickCommand: function () {
             document.querySelector(prefixId + ' .cherry-pick-form').addEventListener('submit', function (event) {
+                showLoadingIndicator();
                 event.preventDefault();
                 var form = event.target,
                     data = {},
-                    ref,
+                    change = '',
                     revisions = publicMethods.getIssueDetails()[0].revisions,
-                    url;
-                data.site = form.site.value;
-                data.repository = form.repository.value;
-                data.revision = form.revision.value;
+                    fetchUrl = '';
 
                 // Visit non-inherited enumerable keys
                 Object.keys(revisions).forEach(function (key) {
                     if (revisions.hasOwnProperty(key)) {
-                        if (parseInt(revisions[key]._number, 10) === parseInt(data.revision, 10)) {
-                            ref = revisions[key].fetch['anonymous http'].ref;
-                            url = revisions[key].fetch['anonymous http'].url;
+                        if (parseInt(revisions[key]._number, 10) === parseInt(form.revision.value, 10)) {
+                            change = revisions[key].fetch['anonymous http'].ref;
+                            fetchUrl = revisions[key].fetch['anonymous http'].url;
                         }
                     }
                 });
 
-                console.log(ref, url);
+                data.change = change;
+                data.fetchUrl = fetchUrl;
+                data.site = form.site.value;
+                data.repository = form.repository.value;
+
+                executeGitReset(data)
+                    .then(function (result) {
+                        if (result.stdout) {
+                            publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+                        }
+                        if (result.stderr) {
+                            publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
+                        }
+                        return executeGitCherryPick(data);
+                    })
+                    .then(function (result) {
+                        if (result.stdout) {
+                            publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+                        }
+                        if (result.stderr) {
+                            publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
+                        }
+                        hideLoadingIndicator();
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             });
         },
 
