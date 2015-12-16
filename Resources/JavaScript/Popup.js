@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (url && result !== undefined) {
                     return t3Review.loadIssueDetails(url);
                 } else {
-                    reject();
+                    reject({});
                 }
             })
             .then(function (issueDetails) {

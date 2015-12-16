@@ -351,6 +351,32 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Set preferred repository
+     *
+     * @since 1.0.0
+     *
+     * @param repository
+     */
+    function setPreferredRepository(repository) {
+        if (localStorage) {
+            localStorage.preferredRepository = repository;
+        }
+    }
+
+    /**
+     * Set preferred review site
+     *
+     * @since 1.0.0
+     *
+     * @param site
+     */
+    function setPreferredReviewSite(site) {
+        if (localStorage) {
+            localStorage.preferredReviewSite = site;
+        }
+    }
+
+    /**
      * Show loading indicator
      *
      * @since 1.0.0
@@ -532,7 +558,6 @@ var TYPO3Review_1447791881 = (function () {
                 }
             })
             .then(function (result) {
-                console.log(result);
                 if (changeDetailUrl && result !== undefined) {
                     publicMethods.loadIssueDetails(changeDetailUrl, revision);
                 }
@@ -659,6 +684,9 @@ var TYPO3Review_1447791881 = (function () {
             select += '</select><br/>';
 
             document.querySelector(prefixId + ' .repositorySelector').innerHTML = select;
+            document.querySelector(prefixId + ' .repositorySelector select').addEventListener('change', function () {
+                setPreferredRepository(this.value);
+            });
             hideLoadingIndicator();
         },
 
@@ -727,6 +755,7 @@ var TYPO3Review_1447791881 = (function () {
                 document.querySelector(prefixId + ' .siteSelector').innerHTML = select;
                 document.querySelector(prefixId + ' .siteSelector select').addEventListener('change', function () {
                     showLoadingIndicator();
+                    setPreferredReviewSite(this.value);
                     publicMethods.getGitRepositories(this.value)
                         .then(function (gitRepositories) {
                             publicMethods.createRepositorySelector(gitRepositories);
@@ -845,7 +874,6 @@ var TYPO3Review_1447791881 = (function () {
                     response = JSON.parse(xhr.response);
                     if (response.status === 'OK') {
                         if (response.stdout === undefined) {
-                            console.log('returning empty array');
                             resolve([]);
                         } else {
                             resolve(response.stdout);
@@ -1059,16 +1087,13 @@ var TYPO3Review_1447791881 = (function () {
                         if (result.stderr) {
                             publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
                         }
+                        showLoadingIndicator();
                         return executeGitCherryPick(data);
                     })
                     .then(function (result) {
                         if (result.stdout) {
                             publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
                         }
-                        if (result.stderr) {
-                            publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
-                        }
-                        hideLoadingIndicator();
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -1121,7 +1146,7 @@ var TYPO3Review_1447791881 = (function () {
             document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.subject;
             document.querySelector(prefixId + ' .changeInformation .project').innerText = change.project;
             document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.branch;
-            document.querySelector(prefixId + ' .changeInformation .canMerge').innerText = change.mergeable;
+            document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">' + change.mergeable + '</span>' : '<span class="status4xx">' + change.mergeable + '</span>';
             document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
             document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
         },
