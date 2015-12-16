@@ -168,6 +168,7 @@ var TYPO3Review_1447791881 = (function () {
      *
      * @since 1.0.0
      *
+     * @param id
      * @param alternativeDocument
      *
      * @return {*}  Not defined.
@@ -194,6 +195,7 @@ var TYPO3Review_1447791881 = (function () {
      *
      * @since 1.0.0
      *
+     * @param id
      * @param alternativeDocument
      *
      * @return {*}  Not defined.
@@ -492,12 +494,11 @@ var TYPO3Review_1447791881 = (function () {
          *
          * @since 1.0.0
          *
-         * @param responseText
+         * @param response
          * @param revision
          */
-        createReviewButtons: function (responseText, revision) {
-            var response = responseText,
-                revisions,
+        createReviewButtons: function (response, revision) {
+            var revisions,
                 allRevisions,
                 cherryPickCommand = '',
                 allRevisionButtons = '',
@@ -567,7 +568,7 @@ var TYPO3Review_1447791881 = (function () {
             }
 
             showLoadingIndicator();
-            var select = '<select name="site">',
+            var select = '<select name="repository">',
                 preferredRepository = getPreferredRepository(items),
                 selected = '';
             items.forEach(function (item) {
@@ -614,7 +615,7 @@ var TYPO3Review_1447791881 = (function () {
                 }
                 cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                 if (cherryPickCommand !== '') {
-                    revisionOptions += '<option value="' + currentRevision._number + '" ' + selected + '>Cherry Pick revision ' + currentRevision._number + '</option>';
+                    revisionOptions += '<option value="' + currentRevision._number + '" ' + selected + '>revision ' + currentRevision._number + '</option>';
                 }
             });
             revisionOptions += '</select><br/>';
@@ -633,7 +634,7 @@ var TYPO3Review_1447791881 = (function () {
         createSiteSelector: function (items) {
             return new Promise(function (resolve, reject) {
                 showLoadingIndicator();
-                var select = '<select name="item">',
+                var select = '<select name="site">',
                     preferredSite = getPreferredReviewSite(items),
                     selected = '';
                 items.forEach(function (item) {
@@ -648,13 +649,67 @@ var TYPO3Review_1447791881 = (function () {
 
                 document.querySelector(prefixId + ' .siteSelector').innerHTML = select;
                 document.querySelector(prefixId + ' .siteSelector select').addEventListener('change', function () {
+                    showLoadingIndicator();
                     publicMethods.getGitRepositories(this.value)
                         .then(function (gitRepositories) {
                             publicMethods.createRepositorySelector(gitRepositories);
+                            hideLoadingIndicator();
+                        })
+                        .catch(function () {
                         });
                 });
                 hideLoadingIndicator();
                 resolve(preferredSite);
+            });
+        },
+
+        /**
+         * Detect the API version
+         *
+         * Promise is always resolved so we can try a fallback script
+         *
+         * @since 1.0.0
+         */
+        detectApiVersion: function () {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest(),
+                    response;
+                xhr.open('GET', apiEnd + '/version', true);
+                xhr.onload = function () {
+                    if (xhr.responseText.charAt(0) === '{') {
+                        response = JSON.parse(xhr.responseText);
+                        if (response.status === 'OK') {
+                            apiVersion = response.stdout;
+                            //publicMethods.addStatusMessage('API: ' + apiVersion);
+                            showApiMarkup(apiVersion);
+                            resolve(apiVersion);
+                        }
+                    }
+                    else {
+                        publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+                        resolve({
+                            status: this.status,
+                            statusText: xhr.statusText
+                        });
+                    }
+                };
+                xhr.onerror = function () {
+                    isReviewSiteAvailable = false;
+                    resolve({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.timeout = 2000;
+                xhr.ontimeout = function () {
+                    isReviewSiteAvailable = false;
+                    publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+                    resolve({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
             });
         },
 
@@ -695,6 +750,44 @@ var TYPO3Review_1447791881 = (function () {
                 publicMethods.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound'), 'error');
             }
             return detailUrl;
+        },
+
+        /**
+         * Get Git repositories
+         *
+         * @param site
+         *
+         * @since 1.0.0
+         */
+        getGitRepositories: function (site) {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest(),
+                    response;
+                xhr.open('GET', apiEnd + '/git/list/' + site, true);
+                xhr.onload = function () {
+                    response = JSON.parse(xhr.response);
+                    if (response.status === 'OK') {
+                        if (response.stdout === undefined) {
+                            console.log('returning empty array');
+                            resolve([]);
+                        } else {
+                            resolve(response.stdout);
+                        }
+                    } else {
+                        reject({
+                            status: response.status,
+                            statusText: response.stderr
+                        });
+                    }
+                };
+                xhr.onerror = function () {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
+            });
         },
 
         /**
@@ -774,94 +867,6 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
-         * Detect the API version
-         *
-         * Promise is always resolved so we can try a fallback script
-         *
-         * @since 1.0.0
-         */
-        detectApiVersion: function () {
-            return new Promise(function (resolve, reject) {
-                var xhr = new XMLHttpRequest(),
-                    response;
-                xhr.open('GET', apiEnd + '/version', true);
-                xhr.onload = function () {
-                    if (xhr.responseText.charAt(0) === '{') {
-                        response = JSON.parse(xhr.responseText);
-                        if (response.status === 'OK') {
-                            apiVersion = response.stdout;
-                            //publicMethods.addStatusMessage('API: ' + apiVersion);
-                            showApiMarkup(apiVersion);
-                            resolve(apiVersion);
-                        }
-                    }
-                    else {
-                        publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
-                        resolve({
-                            status: this.status,
-                            statusText: xhr.statusText
-                        });
-                    }
-                };
-                xhr.onerror = function () {
-                    isReviewSiteAvailable = false;
-                    resolve({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    });
-                };
-                xhr.timeout = 2000;
-                xhr.ontimeout = function () {
-                    isReviewSiteAvailable = false;
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
-                    resolve({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    });
-                };
-                xhr.send();
-            });
-        },
-
-        /**
-         * Get Git repositories
-         *
-         * @param site
-         *
-         * @since 1.0.0
-         */
-        getGitRepositories: function (site) {
-            return new Promise(function (resolve, reject) {
-                var xhr = new XMLHttpRequest(),
-                    response;
-                xhr.open('GET', apiEnd + '/git/list/' + site, true);
-                xhr.onload = function () {
-                    response = JSON.parse(xhr.response);
-                    if (response.status === 'OK') {
-                        if (response.stdout === undefined) {
-                            console.log('returning empty array');
-                            resolve([]);
-                        } else {
-                            resolve(response.stdout);
-                        }
-                    } else {
-                        reject({
-                            status: response.status,
-                            statusText: response.stderr
-                        });
-                    }
-                };
-                xhr.onerror = function () {
-                    reject({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    });
-                };
-                xhr.send();
-            });
-        },
-
-        /**
          * Check if the review site is available
          *
          * @since 1.0.0
@@ -936,6 +941,37 @@ var TYPO3Review_1447791881 = (function () {
                     });
                 };
                 xhr.send();
+            });
+        },
+
+        /**
+         * Listen for cherry pick command
+         *
+         * @since 1.0.0
+         */
+        listenForCherryPickCommand: function () {
+            document.querySelector(prefixId + ' .cherry-pick-form').addEventListener('submit', function (event) {
+                event.preventDefault();
+                var form = event.target,
+                    data = {},
+                    ref,
+                    revisions = publicMethods.getIssueDetails()[0].revisions,
+                    url;
+                data.site = form.site.value;
+                data.repository = form.repository.value;
+                data.revision = form.revision.value;
+
+                // Visit non-inherited enumerable keys
+                Object.keys(revisions).forEach(function (key) {
+                    if (revisions.hasOwnProperty(key)) {
+                        if (parseInt(revisions[key]._number, 10) === parseInt(data.revision, 10)) {
+                            ref = revisions[key].fetch['anonymous http'].ref;
+                            url = revisions[key].fetch['anonymous http'].url;
+                        }
+                    }
+                });
+
+                console.log(ref, url);
             });
         },
 
