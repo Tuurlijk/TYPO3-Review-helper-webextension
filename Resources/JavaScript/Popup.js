@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .then(function () {
-                return t3Review.getGitRepositories(t3Review.getPreferredReviewSite());
+                return t3Review.getGitRepositories(t3Review.getUserDefault('site'));
             })
             .then(function (gitRepositories) {
                 t3Review.createRepositorySelector(gitRepositories);

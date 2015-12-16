@@ -189,36 +189,6 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
-     * Get preferred reset state
-     *
-     * @since 1.0.0
-     */
-    function getPreferredResetState() {
-        var preferredResetState = true;
-        if (localStorage) {
-            preferredResetState = localStorage.preferredResetState;
-        }
-        return preferredResetState;
-    }
-
-    /**
-     * Get preferred repository
-     *
-     * @since 1.0.0
-     *
-     * @return {string}
-     */
-    function getPreferredRepository() {
-        var preferredRepository = 'typo3_src';
-        if (localStorage) {
-            if (localStorage.preferredRepository) {
-                preferredRepository = localStorage.preferredRepository;
-            }
-        }
-        return preferredRepository;
-    }
-
-    /**
      * Fade out infoBox and remove after 1 second
      *
      * @since 1.0.0
@@ -326,45 +296,6 @@ var TYPO3Review_1447791881 = (function () {
             theDocument = document;
         }
         theDocument.querySelector(prefixId + ' .loading').classList.add('hide');
-    }
-
-    /**
-     * Set preferred reset state
-     *
-     * @since 1.0.0
-     *
-     * @param state
-     */
-    function setPreferredResetState(state) {
-        if (localStorage) {
-            localStorage.preferredResetState = state;
-        }
-    }
-
-    /**
-     * Set preferred repository
-     *
-     * @since 1.0.0
-     *
-     * @param repository
-     */
-    function setPreferredRepository(repository) {
-        if (localStorage) {
-            localStorage.preferredRepository = repository;
-        }
-    }
-
-    /**
-     * Set preferred review site
-     *
-     * @since 1.0.0
-     *
-     * @param site
-     */
-    function setPreferredReviewSite(site) {
-        if (localStorage) {
-            localStorage.preferredReviewSite = site;
-        }
     }
 
     /**
@@ -668,6 +599,11 @@ var TYPO3Review_1447791881 = (function () {
             select += '</select><br/>';
 
             document.querySelector(prefixId + ' .repositorySelector').innerHTML = select;
+            document.querySelector(prefixId + ' .repositorySelector select').addEventListener('change', function () {
+                publicMethods.setUserDefault('repository', this.value);
+            });
+            document.querySelector(prefixId + ' .repositorySelector select').value = publicMethods.getUserDefault('repository');
+
             hideLoadingIndicator();
         },
 
@@ -727,6 +663,19 @@ var TYPO3Review_1447791881 = (function () {
                 select += '</select><br/>';
 
                 document.querySelector(prefixId + ' .siteSelector').innerHTML = select;
+                document.querySelector(prefixId + ' .siteSelector select').addEventListener('change', function () {
+                    showLoadingIndicator();
+                    publicMethods.setUserDefault('site', this.value);
+                    publicMethods.getGitRepositories(this.value)
+                        .then(function (gitRepositories) {
+                            publicMethods.createRepositorySelector(gitRepositories);
+                            hideLoadingIndicator();
+                        })
+                        .catch(function () {
+                        });
+                });
+                document.querySelector(prefixId + ' .siteSelector select').value = publicMethods.getUserDefault('site');
+
                 hideLoadingIndicator();
                 resolve();
             });
@@ -903,23 +852,6 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
-         * Get preferred review site
-         *
-         * @since 1.0.0
-         *
-         * @return {string}
-         */
-        getPreferredReviewSite: function () {
-            var preferredReviewSite = 'review.local.typo3.org';
-            if (localStorage) {
-                if (localStorage.preferredReviewSite) {
-                    preferredReviewSite = localStorage.preferredReviewSite;
-                }
-            }
-            return preferredReviewSite;
-        },
-
-        /**
          * Get currently viewed revision
          *
          * @since 1.0.0
@@ -1030,6 +962,42 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
+         * Get user default
+         *
+         * @since 1.0.0
+         *
+         * @param name
+         */
+        getUserDefault: function (name) {
+            var userDefaults = {
+                repository: 'typo3_src',
+                resetRepository: true,
+                site: 'review.local.typo3.org'
+            };
+            if (localStorage && localStorage.userDefaults && localStorage.userDefaults.length > 2) {
+                userDefaults = JSON.parse(localStorage.userDefaults);
+            }
+            return userDefaults[name];
+        },
+
+        /**
+         * Get user defaults
+         *
+         * @since 1.0.0
+         */
+        getUserDefaults: function () {
+            var userDefaults = {
+                repository: 'typo3_src',
+                resetRepository: true,
+                site: 'review.local.typo3.org'
+            };
+            if (localStorage && localStorage.userDefaults && localStorage.userDefaults.length > 2) {
+                userDefaults = JSON.parse(localStorage.userDefaults);
+            }
+            return userDefaults;
+        },
+
+        /**
          * Listen for cherry pick command
          *
          * @since 1.0.0
@@ -1104,24 +1072,8 @@ var TYPO3Review_1447791881 = (function () {
          * @since 1.0.0
          */
         listenForFormChanges: function () {
-            document.querySelector(prefixId + ' .siteSelector select').addEventListener('change', function () {
-                showLoadingIndicator();
-                setPreferredReviewSite(this.value);
-                publicMethods.getGitRepositories(this.value)
-                    .then(function (gitRepositories) {
-                        publicMethods.createRepositorySelector(gitRepositories);
-                        hideLoadingIndicator();
-                    })
-                    .catch(function () {
-                    });
-            });
-
-            document.querySelector(prefixId + ' .repositorySelector select').addEventListener('change', function () {
-                setPreferredRepository(this.value);
-            });
-
             document.querySelector(prefixId + ' .resetRepository').addEventListener('change', function () {
-                setPreferredResetState(this.checked);
+                publicMethods.setUserDefault('resetRepository', this.checked);
             });
         },
 
@@ -1165,9 +1117,35 @@ var TYPO3Review_1447791881 = (function () {
          * @since 1.0.0
          */
         setFormDefaults: function () {
-            document.querySelector(prefixId + ' .siteSelector select').value = publicMethods.getPreferredReviewSite();
-            document.querySelector(prefixId + ' .repositorySelector select').value = getPreferredRepository();
-            document.querySelector(prefixId + ' .resetRepository').checked = getPreferredResetState() === 'true';
+            document.querySelector(prefixId + ' .resetRepository').checked = publicMethods.getUserDefault('resetRepository');
+        },
+
+        /**
+         * Set user default
+         *
+         * @since 1.0.0
+         *
+         * @param name
+         * @param value
+         */
+        setUserDefault: function (name, value) {
+            var userDefaults = {
+                repository: 'typo3_src',
+                resetRepository: true,
+                site: 'review.local.typo3.org'
+            };
+            if (localStorage.userDefaults.length > 2) {
+                userDefaults = JSON.parse(localStorage.userDefaults);
+            }
+            Object.defineProperty(
+                userDefaults,
+                name,
+                {
+                    writable: true,
+                    value: value
+                }
+            );
+            localStorage.userDefaults = JSON.stringify(userDefaults);
         },
 
         /**
