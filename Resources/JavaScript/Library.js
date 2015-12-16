@@ -189,55 +189,33 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Get preferred reset state
+     *
+     * @since 1.0.0
+     */
+    function getPreferredResetState() {
+        var preferredResetState = true;
+        if (localStorage) {
+            preferredResetState = localStorage.preferredResetState;
+        }
+        return preferredResetState;
+    }
+
+    /**
      * Get preferred repository
      *
      * @since 1.0.0
      *
-     * @param repositories
-     *
      * @return {string}
      */
-    function getPreferredRepository(repositories) {
-        var preferredRepository = '';
+    function getPreferredRepository() {
+        var preferredRepository = 'typo3_src';
         if (localStorage) {
             if (localStorage.preferredRepository) {
                 preferredRepository = localStorage.preferredRepository;
             }
         }
-        if (preferredRepository === '') {
-            if (repositories.indexOf('typo3_src') > -1) {
-                preferredRepository = 'typo3_src';
-            } else {
-                preferredRepository = repositories[0];
-            }
-        }
         return preferredRepository;
-    }
-
-    /**
-     * Get preferred review site
-     *
-     * @since 1.0.0
-     *
-     * @param sites
-     *
-     * @return {string}
-     */
-    function getPreferredReviewSite(sites) {
-        var preferredReviewSite = '';
-        if (localStorage) {
-            if (localStorage.preferredReviewSite) {
-                preferredReviewSite = localStorage.preferredReviewSite;
-            }
-        }
-        if (preferredReviewSite === '') {
-            if (sites.indexOf('review.local.typo3.org') > -1) {
-                preferredReviewSite = 'review.local.typo3.org';
-            } else {
-                preferredReviewSite = sites[0];
-            }
-        }
-        return preferredReviewSite;
     }
 
     /**
@@ -348,6 +326,19 @@ var TYPO3Review_1447791881 = (function () {
             theDocument = document;
         }
         theDocument.querySelector(prefixId + ' .loading').classList.add('hide');
+    }
+
+    /**
+     * Set preferred reset state
+     *
+     * @since 1.0.0
+     *
+     * @param state
+     */
+    function setPreferredResetState(state) {
+        if (localStorage) {
+            localStorage.preferredResetState = state;
+        }
     }
 
     /**
@@ -670,23 +661,13 @@ var TYPO3Review_1447791881 = (function () {
             }
 
             showLoadingIndicator();
-            var select = '<select name="repository">',
-                preferredRepository = getPreferredRepository(items),
-                selected = '';
+            var select = '<select name="repository">';
             items.forEach(function (item) {
-                if (item === preferredRepository) {
-                    selected = 'selected';
-                } else {
-                    selected = '';
-                }
-                select += '<option value="' + item + '" ' + selected + '>' + item + '</option>';
+                select += '<option value="' + item + '">' + item + '</option>';
             });
             select += '</select><br/>';
 
             document.querySelector(prefixId + ' .repositorySelector').innerHTML = select;
-            document.querySelector(prefixId + ' .repositorySelector select').addEventListener('change', function () {
-                setPreferredRepository(this.value);
-            });
             hideLoadingIndicator();
         },
 
@@ -739,33 +720,15 @@ var TYPO3Review_1447791881 = (function () {
         createSiteSelector: function (items) {
             return new Promise(function (resolve, reject) {
                 showLoadingIndicator();
-                var select = '<select name="site">',
-                    preferredSite = getPreferredReviewSite(items),
-                    selected = '';
+                var select = '<select name="site">';
                 items.forEach(function (item) {
-                    if (item === preferredSite) {
-                        selected = 'selected';
-                    } else {
-                        selected = '';
-                    }
-                    select += '<option value="' + item + '" ' + selected + '>' + item + '</option>';
+                    select += '<option value="' + item + '">' + item + '</option>';
                 });
                 select += '</select><br/>';
 
                 document.querySelector(prefixId + ' .siteSelector').innerHTML = select;
-                document.querySelector(prefixId + ' .siteSelector select').addEventListener('change', function () {
-                    showLoadingIndicator();
-                    setPreferredReviewSite(this.value);
-                    publicMethods.getGitRepositories(this.value)
-                        .then(function (gitRepositories) {
-                            publicMethods.createRepositorySelector(gitRepositories);
-                            hideLoadingIndicator();
-                        })
-                        .catch(function () {
-                        });
-                });
                 hideLoadingIndicator();
-                resolve(preferredSite);
+                resolve();
             });
         },
 
@@ -940,6 +903,23 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
+         * Get preferred review site
+         *
+         * @since 1.0.0
+         *
+         * @return {string}
+         */
+        getPreferredReviewSite: function () {
+            var preferredReviewSite = 'review.local.typo3.org';
+            if (localStorage) {
+                if (localStorage.preferredReviewSite) {
+                    preferredReviewSite = localStorage.preferredReviewSite;
+                }
+            }
+            return preferredReviewSite;
+        },
+
+        /**
          * Get currently viewed revision
          *
          * @since 1.0.0
@@ -1079,25 +1059,69 @@ var TYPO3Review_1447791881 = (function () {
                 data.site = form.site.value;
                 data.repository = form.repository.value;
 
-                executeGitReset(data)
-                    .then(function (result) {
-                        if (result.stdout) {
-                            publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
-                        }
-                        if (result.stderr) {
-                            publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
-                        }
-                        showLoadingIndicator();
-                        return executeGitCherryPick(data);
+                if (form.resetRepository.checked === false) {
+                    executeGitCherryPick(data)
+                        .then(function (result) {
+                            if (result.stdout) {
+                                publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+                            }
+                        })
+                        .catch(function (error) {
+                            if (error.stdout) {
+                                publicMethods.addStatusMessage('<pre>' + error.stdout.join("\n") + '</pre>');
+                            }
+                            if (error.stderr) {
+                                publicMethods.addStatusMessage('<pre>' + error.stderr.join("\n") + '</pre>', 'error');
+                            }
+                        });
+                } else {
+                    executeGitReset(data)
+                        .then(function (result) {
+                            if (result.stdout) {
+                                publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+                            }
+                            if (result.stderr) {
+                                publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
+                            }
+                            showLoadingIndicator();
+                            return executeGitCherryPick(data);
+                        })
+                        .then(function (result) {
+                            if (result.stdout) {
+                                publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                }
+            });
+        },
+
+        /**
+         * Listen for form changes
+         *
+         * @since 1.0.0
+         */
+        listenForFormChanges: function () {
+            document.querySelector(prefixId + ' .siteSelector select').addEventListener('change', function () {
+                showLoadingIndicator();
+                setPreferredReviewSite(this.value);
+                publicMethods.getGitRepositories(this.value)
+                    .then(function (gitRepositories) {
+                        publicMethods.createRepositorySelector(gitRepositories);
+                        hideLoadingIndicator();
                     })
-                    .then(function (result) {
-                        if (result.stdout) {
-                            publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
+                    .catch(function () {
                     });
+            });
+
+            document.querySelector(prefixId + ' .repositorySelector select').addEventListener('change', function () {
+                setPreferredRepository(this.value);
+            });
+
+            document.querySelector(prefixId + ' .resetRepository').addEventListener('change', function () {
+                setPreferredResetState(this.checked);
             });
         },
 
@@ -1133,6 +1157,17 @@ var TYPO3Review_1447791881 = (function () {
                 };
                 xhr.send();
             });
+        },
+
+        /**
+         * Set form defaults
+         *
+         * @since 1.0.0
+         */
+        setFormDefaults: function () {
+            document.querySelector(prefixId + ' .siteSelector select').value = publicMethods.getPreferredReviewSite();
+            document.querySelector(prefixId + ' .repositorySelector select').value = getPreferredRepository();
+            document.querySelector(prefixId + ' .resetRepository').checked = getPreferredResetState() === 'true';
         },
 
         /**

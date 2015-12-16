@@ -47,11 +47,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     return t3Review.createSiteSelector(sites);
                 }
             })
-            .then(function (preferredSite) {
-                return t3Review.getGitRepositories(preferredSite);
+            .then(function () {
+                return t3Review.getGitRepositories(t3Review.getPreferredReviewSite());
             })
             .then(function (gitRepositories) {
                 t3Review.createRepositorySelector(gitRepositories);
+                t3Review.setFormDefaults();
+                t3Review.listenForFormChanges();
                 t3Review.listenForCherryPickCommand();
             })
             .catch(function () {
