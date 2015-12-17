@@ -418,6 +418,40 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Open review sites
+     *
+     * @since 1.0.0
+     *
+     * @param site
+     */
+    function openSite(site) {
+        var url = 'http://' + site + '/typo3/';
+        console.log(url);
+        if (chrome.tabs !== undefined) {
+            chrome.tabs.query({
+                active: true,
+                currentWindow: true
+            }, function (tabs) {
+                chrome.tabs.create({
+                    'url': url,
+                    'index': tabs[0].index + 1,
+                    'active': false
+                });
+            });
+        }
+
+        if (activeTabId !== undefined) {
+            chrome.runtime.sendMessage({
+                from: 'library',
+                cmd: 'openTab',
+                url: url,
+                index: activeTabId + 1
+            }, function () {
+            });
+        }
+    }
+
+    /**
      * Reset review sites
      *
      * @since 1.0.0
@@ -970,6 +1004,7 @@ var TYPO3Review_1447791881 = (function () {
          */
         getUserDefault: function (name) {
             var userDefaults = {
+                openSite: true,
                 repository: 'typo3_src',
                 resetRepository: true,
                 site: 'review.local.typo3.org'
@@ -987,6 +1022,7 @@ var TYPO3Review_1447791881 = (function () {
          */
         getUserDefaults: function () {
             var userDefaults = {
+                openSite: true,
                 repository: 'typo3_src',
                 resetRepository: true,
                 site: 'review.local.typo3.org'
@@ -1032,6 +1068,9 @@ var TYPO3Review_1447791881 = (function () {
                         .then(function (result) {
                             if (result.stdout) {
                                 publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+                                if (form.openSite.checked === true) {
+                                    openSite(form.site.value);
+                                }
                             }
                         })
                         .catch(function (error) {
@@ -1057,10 +1096,18 @@ var TYPO3Review_1447791881 = (function () {
                         .then(function (result) {
                             if (result.stdout) {
                                 publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+                                if (form.openSite.checked === true) {
+                                    openSite(form.site.value);
+                                }
                             }
                         })
                         .catch(function (error) {
-                            console.log(error);
+                            if (error.stdout) {
+                                publicMethods.addStatusMessage('<pre>' + error.stdout.join("\n") + '</pre>');
+                            }
+                            if (error.stderr) {
+                                publicMethods.addStatusMessage('<pre>' + error.stderr.join("\n") + '</pre>', 'error');
+                            }
                         });
                 }
             });
@@ -1072,6 +1119,9 @@ var TYPO3Review_1447791881 = (function () {
          * @since 1.0.0
          */
         listenForFormChanges: function () {
+            document.querySelector(prefixId + ' .openSite').addEventListener('change', function () {
+                publicMethods.setUserDefault('openSite', this.checked);
+            });
             document.querySelector(prefixId + ' .resetRepository').addEventListener('change', function () {
                 publicMethods.setUserDefault('resetRepository', this.checked);
             });
@@ -1117,6 +1167,7 @@ var TYPO3Review_1447791881 = (function () {
          * @since 1.0.0
          */
         setFormDefaults: function () {
+            document.querySelector(prefixId + ' .openSite').checked = publicMethods.getUserDefault('openSite');
             document.querySelector(prefixId + ' .resetRepository').checked = publicMethods.getUserDefault('resetRepository');
         },
 
@@ -1130,11 +1181,12 @@ var TYPO3Review_1447791881 = (function () {
          */
         setUserDefault: function (name, value) {
             var userDefaults = {
+                openSite: true,
                 repository: 'typo3_src',
                 resetRepository: true,
                 site: 'review.local.typo3.org'
             };
-            if (localStorage.userDefaults.length > 2) {
+            if (localStorage && localStorage.userDefaults && localStorage.userDefaults.length > 2) {
                 userDefaults = JSON.parse(localStorage.userDefaults);
             }
             Object.defineProperty(
@@ -1145,7 +1197,8 @@ var TYPO3Review_1447791881 = (function () {
                     value: value
                 }
             );
-            localStorage.userDefaults = JSON.stringify(userDefaults);
+            localStorage.removeItem('userDefaults');
+            localStorage.setItem('userDefaults', JSON.stringify(userDefaults));
         },
 
         /**
