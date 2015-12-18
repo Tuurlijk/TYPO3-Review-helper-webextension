@@ -188,6 +188,44 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Execute git status command
+     *
+     * @since 1.0.0
+     *
+     * @param data
+     */
+    function executeGitStatus(data) {
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest(),
+                response;
+            xhr.open('GET', apiEnd + '/git/status/' + data.site + '/' + data.repository.replace(/\//g, '!'), true);
+            xhr.onload = function () {
+                response = JSON.parse(xhr.response);
+                if (response.status === 'OK') {
+                    resolve({
+                        status: response.status,
+                        stdout: response.stdout,
+                        stderr: response.stderr
+                    });
+                } else {
+                    reject({
+                        status: response.status,
+                        stderr: response.stderr,
+                        stdout: response.stdout
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        });
+    }
+
+    /**
      * Execute git cherry pick command
      *
      * @since 1.0.0
@@ -704,6 +742,7 @@ var TYPO3Review_1447791881 = (function () {
             document.querySelector(prefixId + ' .repositorySelector').innerHTML = select;
             document.querySelector(prefixId + ' .repositorySelector select').addEventListener('change', function () {
                 publicMethods.setUserDefault('repository', this.value);
+                publicMethods.showRepositoryInformation();
             });
             document.querySelector(prefixId + ' .repositorySelector select').value = publicMethods.getUserDefault('repository');
 
@@ -773,6 +812,9 @@ var TYPO3Review_1447791881 = (function () {
                         .then(function (gitRepositories) {
                             publicMethods.createRepositorySelector(gitRepositories);
                             hideLoadingIndicator();
+                        })
+                        .then(function () {
+                            publicMethods.showRepositoryInformation();
                         })
                         .catch(function () {
                         });
@@ -1134,7 +1176,6 @@ var TYPO3Review_1447791881 = (function () {
                 data.site = form.site.value;
                 data.repository = form.repository.value;
 
-
                 Promise.resolve({status: 'OK'})
                     .then(function () {
                         if (form.resetRepository.checked === true) {
@@ -1270,6 +1311,28 @@ var TYPO3Review_1447791881 = (function () {
             document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">' + change.mergeable + '</span>' : '<span class="status4xx">' + change.mergeable + '</span>';
             document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
             document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
+        },
+
+        /**
+         * Show repository information
+         *
+         * @since 1.0.0
+         *
+         */
+        showRepositoryInformation: function () {
+            var form = document.querySelector(prefixId + ' .cherry-pick-form'),
+                data = {
+                    site: form.site.value,
+                    repository: form.repository.value
+                };
+            console.log(apiEnd + '/git/status/' + data.site + '/' + data.repository);
+            executeGitStatus(data)
+                .then(function (result) {
+                    if (result.status === 'OK') {
+                        document.querySelector(prefixId + ' .repositoryInformation .sha1').innerHTML = result.stdout[0].sha1;
+                        document.querySelector(prefixId + ' .repositoryInformation .subject').innerHTML = result.stdout[0].subject;
+                    }
+                });
         },
 
         /*

@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(function (gitRepositories) {
                 t3Review.createRepositorySelector(gitRepositories);
+                t3Review.showRepositoryInformation();
                 t3Review.setFormDefaults();
                 t3Review.listenForFormChanges();
                 t3Review.listenForCherryPickCommand();
