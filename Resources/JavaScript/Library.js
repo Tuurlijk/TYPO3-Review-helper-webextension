@@ -112,6 +112,44 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Execute git pull command
+     *
+     * @since 1.0.0
+     *
+     * @param data
+     */
+    function executeGitPull(data) {
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest(),
+                response;
+            xhr.open('GET', apiEnd + '/git/pull/' + data.site + '/' + data.repository, true);
+            xhr.onload = function () {
+                response = JSON.parse(xhr.response);
+                if (response.status === 'OK') {
+                    resolve({
+                        status: response.status,
+                        stdout: response.stdout,
+                        stderr: response.stderr
+                    });
+                } else {
+                    reject({
+                        status: response.status,
+                        stderr: response.stderr,
+                        stdout: response.stdout
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        });
+    }
+
+    /**
      * Execute git reset command
      *
      * @since 1.0.0
@@ -296,6 +334,23 @@ var TYPO3Review_1447791881 = (function () {
             theDocument = document;
         }
         theDocument.querySelector(prefixId + ' .loading').classList.add('hide');
+    }
+
+
+    /**
+     * Show command result
+     *
+     * @since 1.0.0
+     *
+     * @param result
+     */
+    function showCommandResult(result) {
+        if (result.stdout) {
+            publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
+        }
+        if (result.stderr) {
+            publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
+        }
     }
 
     /**
@@ -1006,6 +1061,7 @@ var TYPO3Review_1447791881 = (function () {
             var userDefaults = {
                 openSite: true,
                 repository: 'typo3_src',
+                pullRepository: true,
                 resetRepository: true,
                 site: 'review.local.typo3.org'
             };
@@ -1024,6 +1080,7 @@ var TYPO3Review_1447791881 = (function () {
             var userDefaults = {
                 openSite: true,
                 repository: 'typo3_src',
+                pullRepository: true,
                 resetRepository: true,
                 site: 'review.local.typo3.org'
             };
@@ -1063,53 +1120,36 @@ var TYPO3Review_1447791881 = (function () {
                 data.site = form.site.value;
                 data.repository = form.repository.value;
 
-                if (form.resetRepository.checked === false) {
-                    executeGitCherryPick(data)
-                        .then(function (result) {
-                            if (result.stdout) {
-                                publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
-                                if (form.openSite.checked === true) {
-                                    openSite(form.site.value);
-                                }
-                            }
-                        })
-                        .catch(function (error) {
-                            if (error.stdout) {
-                                publicMethods.addStatusMessage('<pre>' + error.stdout.join("\n") + '</pre>');
-                            }
-                            if (error.stderr) {
-                                publicMethods.addStatusMessage('<pre>' + error.stderr.join("\n") + '</pre>', 'error');
-                            }
-                        });
-                } else {
-                    executeGitReset(data)
-                        .then(function (result) {
-                            if (result.stdout) {
-                                publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
-                            }
-                            if (result.stderr) {
-                                publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
-                            }
-                            showLoadingIndicator();
-                            return executeGitCherryPick(data);
-                        })
-                        .then(function (result) {
-                            if (result.stdout) {
-                                publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
-                                if (form.openSite.checked === true) {
-                                    openSite(form.site.value);
-                                }
-                            }
-                        })
-                        .catch(function (error) {
-                            if (error.stdout) {
-                                publicMethods.addStatusMessage('<pre>' + error.stdout.join("\n") + '</pre>');
-                            }
-                            if (error.stderr) {
-                                publicMethods.addStatusMessage('<pre>' + error.stderr.join("\n") + '</pre>', 'error');
-                            }
-                        });
-                }
+
+                Promise.resolve({status: 'OK'})
+                    .then(function () {
+                        if (form.resetRepository.checked === true) {
+                            return executeGitReset(data);
+                        } else {
+                            return Promise.resolve({status: 'OK'});
+                        }
+                    })
+                    .then(function (result) {
+                        showCommandResult(result);
+                        if (form.pullRepository.checked === true) {
+                            return executeGitPull(data);
+                        } else {
+                            return Promise.resolve({status: 'OK'});
+                        }
+                    })
+                    .then(function (result) {
+                        showCommandResult(result);
+                        return executeGitCherryPick(data);
+                    })
+                    .then(function (result) {
+                        showCommandResult(result);
+                        if (form.openSite.checked === true) {
+                            openSite(form.site.value);
+                        }
+                    })
+                    .catch(function (error) {
+                        showCommandResult(error);
+                    });
             });
         },
 
@@ -1121,6 +1161,9 @@ var TYPO3Review_1447791881 = (function () {
         listenForFormChanges: function () {
             document.querySelector(prefixId + ' .openSite').addEventListener('change', function () {
                 publicMethods.setUserDefault('openSite', this.checked);
+            });
+            document.querySelector(prefixId + ' .pullRepository').addEventListener('change', function () {
+                publicMethods.setUserDefault('pullRepository', this.checked);
             });
             document.querySelector(prefixId + ' .resetRepository').addEventListener('change', function () {
                 publicMethods.setUserDefault('resetRepository', this.checked);
@@ -1168,6 +1211,7 @@ var TYPO3Review_1447791881 = (function () {
          */
         setFormDefaults: function () {
             document.querySelector(prefixId + ' .openSite').checked = publicMethods.getUserDefault('openSite');
+            document.querySelector(prefixId + ' .pullRepository').checked = publicMethods.getUserDefault('pullRepository');
             document.querySelector(prefixId + ' .resetRepository').checked = publicMethods.getUserDefault('resetRepository');
         },
 
@@ -1183,20 +1227,14 @@ var TYPO3Review_1447791881 = (function () {
             var userDefaults = {
                 openSite: true,
                 repository: 'typo3_src',
+                pullRepository: true,
                 resetRepository: true,
                 site: 'review.local.typo3.org'
             };
             if (localStorage && localStorage.userDefaults && localStorage.userDefaults.length > 2) {
                 userDefaults = JSON.parse(localStorage.userDefaults);
             }
-            Object.defineProperty(
-                userDefaults,
-                name,
-                {
-                    writable: true,
-                    value: value
-                }
-            );
+            userDefaults[name] = value;
             localStorage.removeItem('userDefaults');
             localStorage.setItem('userDefaults', JSON.stringify(userDefaults));
         },
