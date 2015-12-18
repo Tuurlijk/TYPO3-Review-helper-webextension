@@ -231,23 +231,29 @@ var TYPO3Review_1447791881 = (function () {
      *
      * @since 1.0.0
      *
-     * @param id
+     * @param timestamp
      * @param alternativeDocument
      *
      * @return {*}  Not defined.
      */
-    function fadeOutStatusMessage(id, alternativeDocument) {
-        var theDocument;
+    function fadeOutStatusMessage(timestamp, alternativeDocument) {
+        var index, theDocument;
         if (alternativeDocument !== undefined) {
             theDocument = alternativeDocument;
         } else {
             theDocument = document;
         }
-        theDocument.getElementById(id).classList.remove('fadeIn');
-        theDocument.getElementById(id).classList.add('fadeOut');
-        var timer = new Timer(
+
+        var messages = theDocument.querySelectorAll(prefixId + ' .message.' + timestamp);
+
+        for (index = 0; index < messages.length; ++index) {
+            messages[index].classList.remove('fadeIn');
+            messages[index].classList.add('fadeOut');
+        }
+
+        new Timer(
             function () {
-                removeStatusMessage(id, alternativeDocument);
+                removeStatusMessage(timestamp, alternativeDocument);
             },
             1000
         );
@@ -258,19 +264,23 @@ var TYPO3Review_1447791881 = (function () {
      *
      * @since 1.0.0
      *
-     * @param id
+     * @param timestamp
      * @param alternativeDocument
      *
      * @return {*}  Not defined.
      */
-    function removeStatusMessage(id, alternativeDocument) {
-        var theDocument;
+    function removeStatusMessage(timestamp, alternativeDocument) {
+        var index, theDocument;
         if (alternativeDocument !== undefined) {
             theDocument = alternativeDocument;
         } else {
             theDocument = document;
         }
-        theDocument.getElementById(id).style.display = 'none';
+        var messages = theDocument.querySelectorAll(prefixId + ' .message.' + timestamp);
+
+        for (index = 0; index < messages.length; ++index) {
+            messages[index].style.display = 'none';
+        }
     }
 
     /**
@@ -349,7 +359,6 @@ var TYPO3Review_1447791881 = (function () {
             publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
         }
         if (result.stderr) {
-            console.log(result.status);
             if (result.status === 'OK') {
                 publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>');
             } else {
@@ -1336,7 +1345,7 @@ var TYPO3Review_1447791881 = (function () {
                 theDocument = document;
             }
 
-            var timestamp = (new Date).getTime(),
+            var timestamp = 't' + (new Date).getTime(),
                 messageDiv = theDocument.createElement('div'),
                 closeButton = theDocument.createElement('div');
 
@@ -1350,12 +1359,10 @@ var TYPO3Review_1447791881 = (function () {
 
             hideLoadingIndicator(theDocument);
 
-            messageDiv.id = 'TYPO3Review_' + timestamp;
             messageDiv.innerHTML = message;
-            messageDiv.setAttribute('class', 'message fadeIn status' + status);
+            messageDiv.classList.add(timestamp, 'message', 'fadeIn', 'status' + status);
 
-            closeButton.id = 'TYPO3Review_' + timestamp + '_closeButton';
-            closeButton.setAttribute('class', 'closeButton');
+            closeButton.classList.add('closeButton');
             closeButton.innerText = '✖';
             messageDiv.appendChild(closeButton);
 
@@ -1370,13 +1377,13 @@ var TYPO3Review_1447791881 = (function () {
 
             timers.timestamp = new Timer(
                 function () {
-                    fadeOutStatusMessage(messageDiv.id, alternativeDocument);
+                    fadeOutStatusMessage(timestamp, alternativeDocument);
                 },
                 15000
             );
 
-            theDocument.getElementById(messageDiv.id + '_closeButton').addEventListener('click', function () {
-                fadeOutStatusMessage(messageDiv.id, alternativeDocument);
+            theDocument.querySelector(prefixId + ' .message.' + timestamp + ' .closeButton').addEventListener('click', function () {
+                fadeOutStatusMessage(timestamp, alternativeDocument);
             }, false);
         }
 
