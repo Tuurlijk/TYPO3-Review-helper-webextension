@@ -33,6 +33,15 @@ var TYPO3Review_1447791881 = (function () {
         prefixId = '#TYPO3Review_1447791881',
 
         /**
+         * Template code for the popup
+         *
+         * @since 1.0.0
+         *
+         * @type {string}
+         */
+        popupTemplate = '',
+
+        /**
          * API endpoint
          *
          * @since 1.0.0
@@ -69,7 +78,7 @@ var TYPO3Review_1447791881 = (function () {
      *
      */
     function clearStatusMessages() {
-        document.getElementById(prefix + 'status').innerHTML = '';
+        document.querySelector(prefixId + ' .status').innerHTML = '';
     }
 
     /**
@@ -79,36 +88,43 @@ var TYPO3Review_1447791881 = (function () {
      *
      */
     function createPopupDiv() {
-        var containerDiv = document.createElement('div');
-        containerDiv.id = 'TYPO3Review_1447791881';
-        containerDiv.innerHTML = '<div class="normalMode"><div id="' + prefix + 'closeButton">✖</div><div id="' + prefix + 'status"></div>' +
-            '<div class="separator"></div>' +
-            '<div id="' + prefix + 'loading" class="hide">' +
-            '<div class="throbber" style="background-image: url(\'' + chrome.extension.getURL('Resources/Images/throbber.svg') + '\')"></div>' +
-            '</div>' +
-            '<div class="buttons">' +
-            '<div id="' + prefix + 'currentRevision"></div>' +
-            '<div id="' + prefix + 'allRevisions"></div>' +
-            '<div class="separator"></div>' +
-            '<input id="' + prefix + 'resetButton" class="button" type="button" name="cmd" value="Reset Review Sites">' +
-            '<br/>' +
-            '<input id="' + prefix + 'updateButton" class="button" type="button" name="cmd" value="Update Review Sites">' +
-            '<div class="separator"></div>' +
-            '<input id="' + prefix + 'openReviewSitesButton" class="button" type="button" name="cmd" value="Open Review Sites">' +
-            '</div></div>';
+        Promise.resolve({status: 'OK'})
+            .then(function () {
+                if (popupTemplate === '') {
+                    return fetchPopupTemplate();
+                } else {
+                    return Promise.resolve(popupTemplate);
+                }
+            })
+            .then(function (template) {
+                if (popupTemplate === '') {
+                    popupTemplate = template.replace(/<link[^>]*>/g, '');
+                }
 
-        if (document.getElementsByTagName('body')[0]) {
-            document.getElementsByTagName('body')[0].appendChild(containerDiv);
-        } else {
-            document.getElementsByTagName('html')[0].appendChild(containerDiv);
-        }
-        containerDiv.style.visibility = 'hidden';
+                var containerDiv = document.createElement('div');
+                containerDiv.id = prefixId.replace(/\#/g, '');
+                containerDiv.style.visibility = 'hidden';
+                containerDiv.innerHTML = popupTemplate;
+                containerDiv.querySelector(prefixId + ' .closeButton').classList.remove('hide');
+                containerDiv.classList.add('normalMode');
 
-        document.getElementById(prefix + 'closeButton').addEventListener('click', function () {
-            document.getElementById('TYPO3Review_1447791881').className = 'fadeOutFast';
-            document.getElementById('TYPO3Review_1447791881').style.visibility = 'hidden';
-        }, false);
+                if (document.getElementsByTagName('body')[0]) {
+                    document.getElementsByTagName('body')[0].appendChild(containerDiv);
+                } else {
+                    document.getElementsByTagName('html')[0].appendChild(containerDiv);
+                }
 
+                var elements = containerDiv.querySelectorAll('h1, link, script'),
+                    index;
+                for (index = elements.length - 1; index >= 0; index--) {
+                    elements[index].parentNode.removeChild(elements[index]);
+                }
+
+                document.querySelector(prefixId + ' .closeButton').addEventListener('click', function () {
+                    document.querySelector(prefixId).className = 'fadeOutFast';
+                    document.querySelector(prefixId).style.visibility = 'hidden';
+                }, false);
+            });
     }
 
     /**
@@ -295,6 +311,29 @@ var TYPO3Review_1447791881 = (function () {
             },
             1000
         );
+    }
+
+    /**
+     * Fetch popup template
+     *
+     * @since 1.0.0
+     *
+     */
+    function fetchPopupTemplate() {
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', chrome.extension.getURL('Resources/HTML/Popup.html'), true);
+            xhr.onload = function () {
+                resolve(xhr.response);
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        });
     }
 
     /**
@@ -603,8 +642,8 @@ var TYPO3Review_1447791881 = (function () {
             revision = 'latest',
             popup;
 
-        popup = document.getElementById('TYPO3Review_1447791881');
-        popup.className = '';
+        popup = document.querySelector(prefixId);
+        //popup.className = '';
         popup.style.visibility = 'visible';
         event.target.parentElement.parentElement.appendChild(popup);
 
@@ -975,17 +1014,6 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
-         * Get the id prefix
-         *
-         * @since 1.0.0
-         *
-         * @returns {string}
-         */
-        getPrefix: function () {
-            return prefix;
-        },
-
-        /**
          * Set the active tab id
          *
          * @since 1.0.0
@@ -1201,6 +1229,7 @@ var TYPO3Review_1447791881 = (function () {
                     })
                     .then(function (result) {
                         showCommandResult(result);
+                        publicMethods.showRepositoryInformation();
                         if (form.openSite.checked === true) {
                             openSite(form.site.value);
                         }

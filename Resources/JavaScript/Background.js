@@ -184,17 +184,23 @@ chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         'use strict';
         var response;
-        if (request.cmd === 'getActiveTabId' && request.from === 'content') {
-            sendResponse(sender.tab.index);
-        }
-        if (request.cmd === 'openTab' && request.from === 'library') {
-            chrome.tabs.create({
-                'url': request.url,
-                'index': request.index,
-                'active': false
-            });
-            response = 'ok';
-            sendResponse(response);
+        switch (request.cmd) {
+        case 'getActiveTabId':
+            if (request.from === 'content') {
+                sendResponse(sender.tab.index);
+            }
+            break;
+        case 'openTab':
+            if (request.from === 'library') {
+                chrome.tabs.create({
+                    'url': request.url,
+                    'index': request.index,
+                    'active': false
+                });
+                response = 'ok';
+                sendResponse(response);
+            }
+            break;
         }
     }
 );

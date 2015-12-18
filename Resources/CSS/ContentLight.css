@@ -1,6 +1,6 @@
 #TYPO3Review_1447791881,
 #TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton,
-#TYPO3Review_1447791881 .normalMode,
+#TYPO3Review_1447791881.normalMode,
 #TYPO3Review_1447791881 .microMode,
 #TYPO3Review_1447791881 .sectionTitle,
 #TYPO3Review_1447791881 table,
@@ -51,7 +51,7 @@
 	padding: 0.4em;
 }
 
-#TYPO3Review_1447791881 .normalMode {
+#TYPO3Review_1447791881.normalMode {
 	background-color: rgba(221, 221, 221, 0.95) !important;
 	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#888), to(#aaa)) !important;
 	background-image: -webkit-linear-gradient(#888, #aaa) !important;
@@ -95,7 +95,7 @@
 	color: rgb(100, 100, 100) !important;
 }
 
-#TYPO3Review_1447791881 .normalMode .value {
+#TYPO3Review_1447791881.normalMode .value {
 	width: 80% !important;
 }
 
@@ -280,6 +280,11 @@
 	width: 16px;
 }
 
+#TYPO3Review_1447791881 .logo {
+	position: absolute;
+	top: 2px;
+}
+
 #TYPO3Review_1447791881 .button {
 	-webkit-appearance: none;
 	-webkit-user-select: none;
@@ -371,37 +376,37 @@
 }
 
 #TYPO3Review_1447791881 input[type='checkbox'] {
-  height: 13px;
-  position: relative;
-  vertical-align: middle;
-  width: 13px;
+	height: 13px;
+	position: relative;
+	vertical-align: middle;
+	width: 13px;
 }
 
 #TYPO3Review_1447791881 input[type='checkbox']:checked::before {
-  -webkit-user-select: none;
-  background-image: -webkit-image-set(url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAQAAAADpb+tAAAAaElEQVR4Xl3PIQoCQQCF4Y8JW42D1bDZ4iVEjDbxFpstYhC7eIVBZHkXFGw734sv/TqDQQ8Xb1udja/I8igeIm7Aygj2IpoKTGZnVRNxAHYi4iPiDlA9xX+aNQDFySziqDN6uSp6y7ofEMwZ05uUZRkAAAAASUVORK5CYII=) 1x, url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAQAAABuvaSwAAAAvElEQVR4XrXPMUrDYBzG4UeRZnAQnFxq3XT3AsVABm8QPIHQIeAJuoqb2s1BcHAIin4HVLqEvx9NQgb5rc/wvn4mNBUbqlKDcezCp6Qexxx7lbapx/CBe6mrHsYrKXQ7hKtIre1nOD/W9eiQiK80inis680JEc+1kien+TEfzom4sJG2aZXxmG9LIqaRerohx6V2J72zl2NY2OTUgxm7MEU25sURfZg4590Zw5iFZ8mXS0ZwN+eaPjyh/8O/H7bzPJ5NOo0AAAAASUVORK5CYII=) 2x);
-  background-size: 100% 100%;
-  content: '';
-  display: block;
-  height: 100%;
-  width: 100%;
+	-webkit-user-select: none;
+	background-image: -webkit-image-set(url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAQAAAADpb+tAAAAaElEQVR4Xl3PIQoCQQCF4Y8JW42D1bDZ4iVEjDbxFpstYhC7eIVBZHkXFGw734sv/TqDQQ8Xb1udja/I8igeIm7Aygj2IpoKTGZnVRNxAHYi4iPiDlA9xX+aNQDFySziqDN6uSp6y7ofEMwZ05uUZRkAAAAASUVORK5CYII=) 1x, url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAQAAABuvaSwAAAAvElEQVR4XrXPMUrDYBzG4UeRZnAQnFxq3XT3AsVABm8QPIHQIeAJuoqb2s1BcHAIin4HVLqEvx9NQgb5rc/wvn4mNBUbqlKDcezCp6Qexxx7lbapx/CBe6mrHsYrKXQ7hKtIre1nOD/W9eiQiK80inis680JEc+1kien+TEfzom4sJG2aZXxmG9LIqaRerohx6V2J72zl2NY2OTUgxm7MEU25sURfZg4590Zw5iFZ8mXS0ZwN+eaPjyh/8O/H7bzPJ5NOo0AAAAASUVORK5CYII=) 2x);
+	background-size: 100% 100%;
+	content: '';
+	display: block;
+	height: 100%;
+	width: 100%;
 }
 
 #TYPO3Review_1447791881 label {
-  -webkit-user-select: none;
-  /* Don't expand horizontally: <http://crbug.com/112091>. */
-  align-items: center;
-  display: inline-flex;
-  padding-bottom: 7px;
-  padding-top: 7px;
+	-webkit-user-select: none;
+	/* Don't expand horizontally: <http://crbug.com/112091>. */
+	align-items: center;
+	display: inline-flex;
+	padding-bottom: 7px;
+	padding-top: 7px;
 }
 
 #TYPO3Review_1447791881 label input[type='checkbox'] {
-  -webkit-margin-end: 0.6em;
+	-webkit-margin-end: 0.6em;
 }
 
 #TYPO3Review_1447791881 label {
-  -webkit-margin-end: 0.6em;
+	-webkit-margin-end: 0.6em;
 }
 
 #TYPO3Review_1447791881 .settings-row {
