@@ -349,7 +349,12 @@ var TYPO3Review_1447791881 = (function () {
             publicMethods.addStatusMessage('<pre>' + result.stdout.join("\n") + '</pre>');
         }
         if (result.stderr) {
-            publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
+            console.log(result.status);
+            if (result.status === 'OK') {
+                publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>');
+            } else {
+                publicMethods.addStatusMessage('<pre>' + result.stderr.join("\n") + '</pre>', 'error');
+            }
         }
     }
 

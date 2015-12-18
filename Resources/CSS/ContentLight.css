@@ -139,6 +139,7 @@
 	border: 1px solid #c2c2c2;
 	padding: 0.4em;
 	margin: 0.25em 0;
+	z-index: 2;
 }
 
 #TYPO3Review_1447791881 .status .message.status2xx {
@@ -432,4 +433,5 @@
 	top: 0;
 	left: 0;
 	background-color: rgba(251, 251, 251, 0.9);
+	z-index: 1;
 }
