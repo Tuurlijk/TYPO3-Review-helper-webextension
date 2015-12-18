@@ -1124,6 +1124,7 @@ var TYPO3Review_1447791881 = (function () {
                 Promise.resolve({status: 'OK'})
                     .then(function () {
                         if (form.resetRepository.checked === true) {
+                            showLoadingIndicator();
                             return executeGitReset(data);
                         } else {
                             return Promise.resolve({status: 'OK'});
@@ -1132,6 +1133,7 @@ var TYPO3Review_1447791881 = (function () {
                     .then(function (result) {
                         showCommandResult(result);
                         if (form.pullRepository.checked === true) {
+                            showLoadingIndicator();
                             return executeGitPull(data);
                         } else {
                             return Promise.resolve({status: 'OK'});
@@ -1139,6 +1141,7 @@ var TYPO3Review_1447791881 = (function () {
                     })
                     .then(function (result) {
                         showCommandResult(result);
+                        showLoadingIndicator();
                         return executeGitCherryPick(data);
                     })
                     .then(function (result) {
