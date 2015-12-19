@@ -45,7 +45,7 @@
   },
   "apiVersionFetchFail": {
     "description": "Message shown in the popup when fetching the api version failed",
-    "message": "Failed to fetch the review api version. Falling back to review.php script."
+    "message": "Failed to fetch the review api version. Is your review machine running? Falling back to review.php script."
   },
   "issueDetailLoadFail": {
     "description": "Message shown in the popup when loading issue details failed",

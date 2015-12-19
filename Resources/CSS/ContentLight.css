@@ -12,13 +12,13 @@
 #TYPO3Review_1447791881 tr:hover {
 	background: transparent none !important;
 	border: 0 !important;
-	color: rgb(50, 50, 50) !important;
+	color: rgb(50, 50, 50);
 	cursor: text !important;
-	font: 11px 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+	font: 11px 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	height: auto !important;
-	margin: 0 !important;
-	text-align: left !important;
-	text-shadow: none !important;
+	margin: 0;
+	text-align: left;
+	text-shadow: none;
 	text-transform: none !important;
 	vertical-align: top !important;
 	width: auto !important;
@@ -32,6 +32,10 @@
 	text-align: right;
 	text-shadow: 1px 1px 1px white, 0 0 0 black, 1px 1px 1px white;
 	white-space: nowrap;
+}
+
+#TYPO3Review_1447791881.normalMode h1 {
+	margin-right: 2em;
 }
 
 #TYPO3Review_1447791881 table {
