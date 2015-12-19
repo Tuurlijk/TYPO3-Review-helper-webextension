@@ -1,8 +1,10 @@
 #TYPO3Review_1447791881,
-#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton,
+#TYPO3Review_1447791881 .closeButton,
 #TYPO3Review_1447791881.normalMode,
 #TYPO3Review_1447791881 .microMode,
 #TYPO3Review_1447791881 .sectionTitle,
+#TYPO3Review_1447791881 h1,
+#TYPO3Review_1447791881 pre,
 #TYPO3Review_1447791881 table,
 #TYPO3Review_1447791881 td,
 #TYPO3Review_1447791881 td:hover,
@@ -20,6 +22,16 @@
 	text-transform: none !important;
 	vertical-align: top !important;
 	width: auto !important;
+}
+
+#TYPO3Review_1447791881 h1 {
+	color: rgba(100, 100, 100, 0.80);
+	font-size: 12px;
+	font-weight: bold;
+	margin-bottom: 4px;
+	text-align: right;
+	text-shadow: 1px 1px 1px white, 0 0 0 black, 1px 1px 1px white;
+	white-space: nowrap;
 }
 
 #TYPO3Review_1447791881 table {
@@ -44,7 +56,7 @@
 
 #TYPO3Review_1447791881 {
 	box-sizing: content-box !important;
-	display: block !important;
+	display: block;
 	animation: fadein 1s;
 	-webkit-animation: fadein 1s;
 	z-index: 2147483647 !important;
@@ -63,11 +75,11 @@
 	border-radius: 2px !important;
 	box-shadow: 1px 4px 13px rgb(100, 100, 100) !important;
 	box-sizing: content-box !important;
-	display: block !important;
+	display: block;
 	margin-top: 5px !important;
 	padding: 4px 8px !important;
 	position: absolute !important;
-	width: 220px !important;
+	right: 0;
 }
 
 #TYPO3Review_1447791881 .status .fadeIn,
@@ -88,8 +100,7 @@
 	-webkit-animation: fadeout 0.3s;
 }
 
-#TYPO3Review_1447791881 .status .closeButton,
-#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton,
+#TYPO3Review_1447791881 .closeButton,
 #TYPO3Review_1447791881 .sectionTitle,
 #TYPO3Review_1447791881 .key {
 	color: rgb(100, 100, 100) !important;
@@ -101,8 +112,7 @@
 
 #TYPO3Review_1447791881 .url a,
 #TYPO3Review_1447791881 .sectionTitle,
-#TYPO3Review_1447791881 .status .closeButton:hover,
-#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton:hover,
+#TYPO3Review_1447791881 .closeButton:hover,
 #TYPO3Review_1447791881 .key:hover {
 	color: rgb(50, 50, 50) !important;
 }
@@ -152,8 +162,7 @@
 	border-left: 2px solid #c60000;
 }
 
-#TYPO3Review_1447791881 .status .closeButton,
-#TYPO3Review_1447791881 #TYPO3Review_1447791881_closeButton {
+#TYPO3Review_1447791881 .closeButton {
 	cursor: pointer !important;
 	position: absolute !important;
 	top: 4px !important;
@@ -427,6 +436,7 @@
 	white-space: nowrap;
 }
 
+#TYPO3Review_1447791881.hide,
 #TYPO3Review_1447791881 .hide {
 	display: none;
 }

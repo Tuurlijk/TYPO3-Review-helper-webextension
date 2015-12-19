@@ -82,13 +82,13 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
-     * Create popup element
+     * Create content popup element
      *
      * @since 1.0.0
      *
      */
-    function createPopupDiv() {
-        Promise.resolve({status: 'OK'})
+    function createContentPopup() {
+        return Promise.resolve({status: 'OK'})
             .then(function () {
                 if (popupTemplate === '') {
                     return fetchPopupTemplate();
@@ -103,10 +103,11 @@ var TYPO3Review_1447791881 = (function () {
 
                 var containerDiv = document.createElement('div');
                 containerDiv.id = prefixId.replace(/\#/g, '');
-                containerDiv.style.visibility = 'hidden';
                 containerDiv.innerHTML = popupTemplate;
                 containerDiv.querySelector(prefixId + ' .closeButton').classList.remove('hide');
                 containerDiv.classList.add('normalMode');
+
+                containerDiv.querySelector(prefixId + ' .throbber').style.backgroundImage = "url('" + chrome.extension.getURL('Resources/Images/throbber.svg') + "')";
 
                 if (document.getElementsByTagName('body')[0]) {
                     document.getElementsByTagName('body')[0].appendChild(containerDiv);
@@ -114,15 +115,14 @@ var TYPO3Review_1447791881 = (function () {
                     document.getElementsByTagName('html')[0].appendChild(containerDiv);
                 }
 
-                var elements = containerDiv.querySelectorAll('h1, link, script'),
+                var elements = containerDiv.querySelectorAll('link, script'),
                     index;
                 for (index = elements.length - 1; index >= 0; index--) {
                     elements[index].parentNode.removeChild(elements[index]);
                 }
 
                 document.querySelector(prefixId + ' .closeButton').addEventListener('click', function () {
-                    document.querySelector(prefixId).className = 'fadeOutFast';
-                    document.querySelector(prefixId).style.visibility = 'hidden';
+                    document.querySelector(prefixId).classList.add('hide');
                 }, false);
             });
     }
@@ -631,41 +631,26 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
-     * Show review popup
+     * Show content popup
      *
      * @since 1.0.0
      *
      * @param event
      */
-    function showReviewPopup(event) {
-        var changeDetailUrl = publicMethods.getChangeDetailUrl(event.target.parentElement.href),
+    function showContentPopup(event) {
+        var url = publicMethods.getChangeDetailUrl(event.target.parentElement.href),
             revision = 'latest',
             popup;
 
         popup = document.querySelector(prefixId);
-        //popup.className = '';
-        popup.style.visibility = 'visible';
+        popup.classList.remove('hide');
         event.target.parentElement.parentElement.appendChild(popup);
 
         // Make sure the popup can scroll with the buttons in the table cell
         event.target.parentElement.parentElement.style.position = 'relative';
 
         // Set the review api version
-        publicMethods.detectApiVersion()
-            .then(function () {
-                if (publicMethods.getApiVersion() > 0) {
-
-                } else {
-                    return publicMethods.getReviewSiteAvailability();
-                }
-            })
-            .then(function (result) {
-                if (changeDetailUrl && result !== undefined) {
-                    publicMethods.loadIssueDetails(changeDetailUrl, revision);
-                }
-            })
-            .catch(function (reason) {
-            });
+        publicMethods.populatePopup(url, revision);
     }
 
     /**
@@ -1292,6 +1277,56 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
+         * Populate the popup
+         *
+         * @param url
+         * @param revision
+         */
+        populatePopup: function (url, revision) {
+            publicMethods.detectApiVersion()
+                .then(function () {
+                    if (publicMethods.getApiVersion() === 0) {
+                        return publicMethods.getReviewSiteAvailability();
+                    } else {
+                        return {status: true};
+                    }
+                })
+                .then(function (result) {
+                    if (url && result !== undefined) {
+                        return publicMethods.loadIssueDetails(url);
+                    } else {
+                        reject({});
+                    }
+                })
+                .then(function (issueDetails) {
+                    if (publicMethods.getApiVersion() === 0) {
+                        publicMethods.createReviewButtons(issueDetails, revision);
+                    } else {
+                        return publicMethods.getTypo3Sites();
+                    }
+                })
+                .then(function (sites) {
+                    if (sites.length > 0) {
+                        publicMethods.showChangeInformation();
+                        publicMethods.createReviewSelector(publicMethods.getIssueDetails(), revision);
+                        return publicMethods.createSiteSelector(sites);
+                    }
+                })
+                .then(function () {
+                    return publicMethods.getGitRepositories(publicMethods.getUserDefault('site'));
+                })
+                .then(function (gitRepositories) {
+                    publicMethods.createRepositorySelector(gitRepositories);
+                    publicMethods.showRepositoryInformation();
+                    publicMethods.setFormDefaults();
+                    publicMethods.listenForFormChanges();
+                    publicMethods.listenForCherryPickCommand();
+                })
+                .catch(function () {
+                });
+        },
+
+        /**
          * Set form defaults
          *
          * @since 1.0.0
@@ -1354,7 +1389,6 @@ var TYPO3Review_1447791881 = (function () {
                     site: form.site.value,
                     repository: form.repository.value
                 };
-            console.log(apiEnd + '/git/status/' + data.site + '/' + data.repository);
             executeGitStatus(data)
                 .then(function (result) {
                     if (result.status === 'OK') {
@@ -1386,7 +1420,7 @@ var TYPO3Review_1447791881 = (function () {
             // Execute the requested command
             switch (request.cmd) {
             case 'addButtons':
-                createPopupDiv();
+                createContentPopup();
                 links = document.getElementsByTagName('a');
                 for (m = 0, n = links.length; m < n; ++m) {
                     if (links[m].href.startsWith(request.gerritUrl)) {
@@ -1400,8 +1434,10 @@ var TYPO3Review_1447791881 = (function () {
                         button.appendChild(reviewTextNode);
                         clone.addEventListener('click', function (event) {
                             event.preventDefault();
+                            // Make sure the popup can scroll with the buttons in the table cell
+                            event.target.parentElement.parentElement.style.position = 'relative';
                             clearStatusMessages();
-                            showReviewPopup(event);
+                            showContentPopup(event);
                         }, false);
                         parent.appendChild(clone);
                         ++m;
