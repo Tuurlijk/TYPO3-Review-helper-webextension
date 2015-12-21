@@ -1317,8 +1317,8 @@ var TYPO3Review_1447791881 = (function () {
                     });
                 }
                 if (getTabUrl().startsWith(getStashUrl())) {
-                    change = issueDetails.toRef.id;
-                    fetchUrl = issueDetails.toRef.repository.cloneUrl;
+                    change = issueDetails.fromRef.id;
+                    fetchUrl = issueDetails.fromRef.repository.cloneUrl;
                 }
 
                 data.change = change;
@@ -1521,10 +1521,10 @@ var TYPO3Review_1447791881 = (function () {
             }
             if (getTabUrl().startsWith(getStashUrl())) {
                 document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.title;
-                document.querySelector(prefixId + ' .changeInformation .project').innerText = change.toRef.repository.name;
-                document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.toRef.displayId;
-                document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.toRef.latestChangeset;
-                document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.toRef.latestCommit;
+                document.querySelector(prefixId + ' .changeInformation .project').innerText = change.fromRef.repository.name;
+                document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.fromRef.displayId;
+                document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.fromRef.latestChangeset;
+                document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.fromRef.latestCommit;
             }
         },
 
