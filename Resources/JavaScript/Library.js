@@ -15,6 +15,42 @@ var TYPO3Review_1447791881 = (function () {
     var activeTabId,
 
         /**
+         * Forger url
+         *
+         * @since 2.0.0
+         *
+         * @type {string}
+         */
+        forgerUrl = 'https://forger.typo3.org/',
+
+        /**
+         * Gerrit url
+         *
+         * @since 2.0.0
+         *
+         * @type {string}
+         */
+        gerritUrl = 'https://review.typo3.org/',
+
+        /**
+         * Stash url
+         *
+         * @since 2.0.0
+         *
+         * @type {string}
+         */
+        stashUrl = 'https://stash.maxserv.com/',
+
+        /**
+         * Tab url
+         *
+         * @since 2.0.0
+         *
+         * @type {string}
+         */
+        tabUrl = '',
+
+        /**
          * ID prefix used to uniquely target elements in content script
          *
          * @since 1.0.0
@@ -56,13 +92,6 @@ var TYPO3Review_1447791881 = (function () {
          * @since 1.0.0
          */
         apiVersion = '0',
-
-        /**
-         * Is the review site available?
-         *
-         * @since 1.0.0
-         */
-        isReviewSiteAvailable = false,
 
         /**
          * Issue details
@@ -334,6 +363,65 @@ var TYPO3Review_1447791881 = (function () {
             };
             xhr.send();
         });
+    }
+
+    /**
+     * Get forger url
+     *
+     * @since 2.0.0
+     *
+     * @returns {string}
+     */
+    function getForgerUrl() {
+        if (localStorage) {
+            if (localStorage.forgerUrl) {
+                forgerUrl = localStorage.forgerUrl;
+            }
+        }
+        return forgerUrl;
+    }
+
+    /**
+     * Get gerrit url
+     *
+     * @since 2.0.0
+     *
+     * @returns {string}
+     */
+    function getGerritUrl() {
+        if (localStorage) {
+            if (localStorage.gerritUrl) {
+                gerritUrl = localStorage.gerritUrl;
+            }
+        }
+        return gerritUrl;
+    }
+
+    /**
+     * Get stash url
+     *
+     * @since 2.0.0
+     *
+     * @returns {string}
+     */
+    function getStashUrl() {
+        if (localStorage) {
+            if (localStorage.stashUrl) {
+                stashUrl = localStorage.stashUrl;
+            }
+        }
+        return stashUrl;
+    }
+
+    /**
+     * Get tab url
+     *
+     * @since 2.0.0
+     *
+     * @returns {string}
+     */
+    function getTabUrl() {
+        return tabUrl;
     }
 
     /**
@@ -621,6 +709,17 @@ var TYPO3Review_1447791881 = (function () {
     }
 
     /**
+     * Set tab url
+     *
+     * @since 2.0.0
+     *
+     * @param url
+     */
+    function setTabUrl(url) {
+        tabUrl = url;
+    }
+
+    /**
      * Un-hide api markup in template
      *
      * @param apiVersion
@@ -778,34 +877,42 @@ var TYPO3Review_1447791881 = (function () {
          *
          * @since 1.0.0
          *
-         * @param response
          * @param revision
          */
-        createReviewSelector: function (response, revision) {
+        createReviewSelector: function (revision) {
             showLoadingIndicator();
             var revisions,
                 selected = '',
                 cherryPickCommand = '',
+                response = publicMethods.getIssueDetails(),
                 revisionOptions = '<select name="revision">';
 
-            if (revision === 'latest' || '') {
-                revision = objectLength(response[0].revisions);
+            if (getTabUrl().startsWith(getGerritUrl())) {
+                if (revision === 'latest' || '') {
+                    revision = objectLength(response[0].revisions);
+                }
+                revisions = Object.keys(response[0].revisions).map(function (key) {
+                    return response[0].revisions[key];
+                });
+                revisions.sort(sortObjectArrayByRevision);
+                revisions.forEach(function (currentRevision) {
+                    if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
+                        selected = 'selected';
+                    } else {
+                        selected = '';
+                    }
+                    cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
+                    if (cherryPickCommand !== '') {
+                        revisionOptions += '<option value="' + currentRevision._number + '" ' + selected + '>revision ' + currentRevision._number + '</option>';
+                    }
+                });
             }
-            revisions = Object.keys(response[0].revisions).map(function (key) {
-                return response[0].revisions[key];
-            });
-            revisions.sort(sortObjectArrayByRevision);
-            revisions.forEach(function (currentRevision) {
-                if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
-                    selected = 'selected';
-                } else {
-                    selected = '';
-                }
-                cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
+            if (getTabUrl().startsWith(getStashUrl())) {
+                cherryPickCommand = response.fromRef;
                 if (cherryPickCommand !== '') {
-                    revisionOptions += '<option value="' + currentRevision._number + '" ' + selected + '>revision ' + currentRevision._number + '</option>';
+                    revisionOptions += '<option value="' + response.id + '" ' + selected + ' selected="selected">pull-request ' + response.id + '</option>';
                 }
-            });
+            }
             revisionOptions += '</select><br/>';
 
             document.querySelector(prefixId + ' .reviewSelector').innerHTML = revisionOptions;
@@ -881,7 +988,6 @@ var TYPO3Review_1447791881 = (function () {
                     }
                 };
                 xhr.onerror = function () {
-                    isReviewSiteAvailable = false;
                     resolve({
                         status: this.status,
                         statusText: xhr.statusText
@@ -889,7 +995,6 @@ var TYPO3Review_1447791881 = (function () {
                 };
                 xhr.timeout = 2000;
                 xhr.ontimeout = function () {
-                    isReviewSiteAvailable = false;
                     publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
                     resolve({
                         status: this.status,
@@ -910,11 +1015,16 @@ var TYPO3Review_1447791881 = (function () {
          */
         getChangeDetailUrl: function (url) {
             var parser = document.createElement('a'),
+                index,
                 issueNumber,
                 hashParts,
+                pathSegments,
+                shiftCount,
                 revision = 'latest',
                 detailUrl = '';
             parser.href = url;
+
+            // Gerrit url
             if (parser.hash.startsWith('#/c/')) {
                 hashParts = parser.hash.split('/');
 
@@ -933,6 +1043,29 @@ var TYPO3Review_1447791881 = (function () {
                     detailUrl = parser.protocol + '//' + parser.hostname + '/changes/?q=change:' + issueNumber + '&o=ALL_REVISIONS&o=DOWNLOAD_COMMANDS';
                 }
             }
+
+            if (parser.pathname.indexOf('\/pull-requests\/') > -1) {
+                pathSegments = parser.pathname.split('/').reverse();
+
+                for (index = 0; index < pathSegments.length; index = index + 1) {
+                    issueNumber = pathSegments[index];
+                    issueNumber = parseInt(issueNumber, 10);
+                    if ((typeof issueNumber === 'number') && (issueNumber % 1 === 0) && issueNumber > 0) {
+                        break;
+                    }
+                }
+
+                pathSegments = pathSegments.reverse();
+                for (shiftCount = 0; shiftCount < index; shiftCount = shiftCount + 1) {
+                    pathSegments.pop();
+                }
+
+                if (issueNumber !== undefined) {
+                    // https://stash.maxserv.com/rest/api/latest/projects/TUE/repos/tue.nl/pull-requests/85
+                    detailUrl = parser.protocol + '//' + parser.hostname + '/rest/api/latest' + pathSegments.join('/');
+                }
+            }
+
             if (detailUrl === '') {
                 publicMethods.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound'), 'error');
             }
@@ -1053,14 +1186,12 @@ var TYPO3Review_1447791881 = (function () {
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 0 || xhr.status === 400 || xhr.status === 404) {
-                            isReviewSiteAvailable = false;
                             publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
                             reject({
                                 status: this.status,
                                 statusText: xhr.statusText
                             });
                         } else {
-                            isReviewSiteAvailable = true;
                             resolve({
                                 status: this.status,
                                 statusText: xhr.statusText
@@ -1069,7 +1200,6 @@ var TYPO3Review_1447791881 = (function () {
                     }
                 };
                 xhr.onerror = function () {
-                    isReviewSiteAvailable = false;
                     reject({
                         status: this.status,
                         statusText: xhr.statusText
@@ -1077,7 +1207,6 @@ var TYPO3Review_1447791881 = (function () {
                 };
                 xhr.timeout = 2000;
                 xhr.ontimeout = function () {
-                    isReviewSiteAvailable = false;
                     publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
                     reject({
                         status: this.status,
@@ -1171,24 +1300,33 @@ var TYPO3Review_1447791881 = (function () {
                 var form = event.target,
                     data = {},
                     change = '',
-                    revisions = publicMethods.getIssueDetails()[0].revisions,
-                    fetchUrl = '';
+                    issueDetails = publicMethods.getIssueDetails(),
+                    fetchUrl = '',
+                    revisions;
 
-                // Visit non-inherited enumerable keys
-                Object.keys(revisions).forEach(function (key) {
-                    if (revisions.hasOwnProperty(key)) {
-                        if (parseInt(revisions[key]._number, 10) === parseInt(form.revision.value, 10)) {
-                            change = revisions[key].fetch['anonymous http'].ref;
-                            fetchUrl = revisions[key].fetch['anonymous http'].url;
+                if (getTabUrl().startsWith(getGerritUrl())) {
+                    revisions = issueDetails[0].revisions;
+                    // Visit non-inherited enumerable keys
+                    Object.keys(revisions).forEach(function (key) {
+                        if (revisions.hasOwnProperty(key)) {
+                            if (parseInt(revisions[key]._number, 10) === parseInt(form.revision.value, 10)) {
+                                change = revisions[key].fetch['anonymous http'].ref;
+                                fetchUrl = revisions[key].fetch['anonymous http'].url;
+                            }
                         }
-                    }
-                });
+                    });
+                }
+                if (getTabUrl().startsWith(getStashUrl())) {
+                    change = issueDetails.toRef.id;
+                    fetchUrl = issueDetails.toRef.repository.cloneUrl;
+                }
 
                 data.change = change;
                 data.fetchUrl = fetchUrl;
                 data.site = form.site.value;
                 data.repository = form.repository.value;
 
+                console.log(data);
                 Promise.resolve({status: 'OK'})
                     .then(function () {
                         if (form.resetRepository.checked === true) {
@@ -1258,8 +1396,10 @@ var TYPO3Review_1447791881 = (function () {
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
-                            if (xhr.responseText.startsWith(')]}\'')) {
+                            if (url.startsWith(getGerritUrl()) && xhr.responseText.startsWith(')]}\'')) {
                                 responseText = xhr.responseText.substr(4);
+                            } else {
+                                responseText = xhr.responseText;
                             }
                             issueDetails = JSON.parse(responseText);
                             resolve(issueDetails);
@@ -1283,6 +1423,7 @@ var TYPO3Review_1447791881 = (function () {
          * @param revision
          */
         populatePopup: function (url, revision) {
+            setTabUrl(url);
             publicMethods.detectApiVersion()
                 .then(function () {
                     if (publicMethods.getApiVersion() === 0) {
@@ -1308,7 +1449,7 @@ var TYPO3Review_1447791881 = (function () {
                 .then(function (sites) {
                     if (sites.length > 0) {
                         publicMethods.showChangeInformation();
-                        publicMethods.createReviewSelector(publicMethods.getIssueDetails(), revision);
+                        publicMethods.createReviewSelector(revision);
                         return publicMethods.createSiteSelector(sites);
                     }
                 })
@@ -1368,13 +1509,23 @@ var TYPO3Review_1447791881 = (function () {
          *
          */
         showChangeInformation: function () {
-            var change = publicMethods.getIssueDetails()[0];
-            document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.subject;
-            document.querySelector(prefixId + ' .changeInformation .project').innerText = change.project;
-            document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.branch;
-            document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">' + change.mergeable + '</span>' : '<span class="status4xx">' + change.mergeable + '</span>';
-            document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
-            document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
+            var change = publicMethods.getIssueDetails();
+            if (getTabUrl().startsWith(getGerritUrl())) {
+                change = change[0];
+                document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.subject;
+                document.querySelector(prefixId + ' .changeInformation .project').innerText = change.project;
+                document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.branch;
+                document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">' + change.mergeable + '</span>' : '<span class="status4xx">' + change.mergeable + '</span>';
+                document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
+                document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
+            }
+            if (getTabUrl().startsWith(getStashUrl())) {
+                document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.title;
+                document.querySelector(prefixId + ' .changeInformation .project').innerText = change.toRef.repository.name;
+                document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.toRef.displayId;
+                document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.toRef.latestChangeset;
+                document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.toRef.latestCommit;
+            }
         },
 
         /**
@@ -1394,6 +1545,7 @@ var TYPO3Review_1447791881 = (function () {
                     if (result.status === 'OK') {
                         document.querySelector(prefixId + ' .repositoryInformation .sha1').innerHTML = result.stdout[0].sha1;
                         document.querySelector(prefixId + ' .repositoryInformation .subject').innerHTML = result.stdout[0].subject;
+                        document.querySelector(prefixId + ' .repositoryInformation .subject').setAttribute('title', result.stdout[0].subject);
                     }
                 });
         },

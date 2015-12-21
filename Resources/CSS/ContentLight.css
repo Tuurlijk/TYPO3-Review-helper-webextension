@@ -24,6 +24,12 @@
 	width: auto !important;
 }
 
+#TYPO3Review_1447791881 .code:hover,
+#TYPO3Review_1447791881 .code,
+#TYPO3Review_1447791881 pre {
+	font-family: Menlo, 'Courier New', sans-serif;
+}
+
 #TYPO3Review_1447791881 h1 {
 	color: rgba(100, 100, 100, 0.80);
 	font-size: 12px;
@@ -52,7 +58,6 @@
 
 #TYPO3Review_1447791881 td,
 #TYPO3Review_1447791881 td:hover {
-	max-width: 400px !important;
 	padding: 1px 4px 1px 0 !important;
 	overflow-x: hidden !important;
 	text-overflow: ellipsis !important;

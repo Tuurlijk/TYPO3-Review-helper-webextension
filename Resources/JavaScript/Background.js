@@ -55,9 +55,12 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     // Prepare some variables
     var forgerUrl = 'https://forger.typo3.org/',
         gerritUrl = 'https://review.typo3.org/',
+        stashUrl = 'https://stash.maxserv.com/',
+        index,
         parser,
         hashParts,
-        issueNumber;
+        issueNumber,
+        pathSegments;
 
     // Check if localStorage is available and get the settings out of it
     if (localStorage) {
@@ -66,6 +69,31 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
         if (localStorage.gerritUrl) {
             gerritUrl = localStorage.gerritUrl;
+        }
+        if (localStorage.stashUrl) {
+            stashUrl = localStorage.stashUrl;
+        }
+    }
+
+    // Add content buttons if we are on a forger url with review links
+    if (tab.url.startsWith(forgerUrl)) {
+        parser = document.createElement('a');
+        parser.href = tab.url;
+        if (parser.pathname.startsWith('/gerrit/')) {
+            chrome.tabs.insertCSS(tab.id, {
+                file: '/Resources/CSS/ContentLight.css'
+            });
+
+            chrome.tabs.sendMessage(
+                tab.id,
+                {
+                    cmd: 'addButtons',
+                    gerritUrl: gerritUrl
+                },
+                function () {
+                    //console.log(response);
+                }
+            );
         }
     }
 
@@ -93,27 +121,32 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
     }
 
-    // Add content buttons if we are on a forger url with review links
-    if (tab.url.startsWith(forgerUrl)) {
+    // Show icon if we are on a stashUrl
+    if (tab.url.startsWith(stashUrl)) {
+        // Show the pageAction
+        chrome.pageAction.show(tabId);
+
         parser = document.createElement('a');
         parser.href = tab.url;
-        if (parser.pathname.startsWith('/gerrit/')) {
-            chrome.tabs.insertCSS(tab.id, {
-                file: '/Resources/CSS/ContentLight.css'
-            });
+        if (parser.pathname.indexOf('\/pull-requests\/') > -1) {
+            pathSegments = parser.pathname.split('/').reverse();
 
-            chrome.tabs.sendMessage(
-                tab.id,
-                {
-                    cmd: 'addButtons',
-                    gerritUrl: gerritUrl
-                },
-                function () {
-                    //console.log(response);
+            for (index = 0; index < pathSegments.length; index = index + 1) {
+                issueNumber = pathSegments[index];
+                issueNumber = parseInt(issueNumber, 10);
+                if ((typeof issueNumber === 'number') && (issueNumber % 1 === 0) && issueNumber > 0) {
+                    break;
                 }
-            );
+            }
+
+            if (issueNumber !== undefined) {
+                updateIcon(1, tabId);
+            }
+        } else {
+            updateIcon(0, tabId);
         }
     }
+
 });
 
 /**
