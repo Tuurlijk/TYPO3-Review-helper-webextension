@@ -57,15 +57,6 @@ var TYPO3Review_1447791881 = (function () {
          *
          * @type {string}
          */
-        prefix = 'TYPO3Review_1447791881_',
-
-        /**
-         * ID prefix used to uniquely target elements in content script
-         *
-         * @since 1.0.0
-         *
-         * @type {string}
-         */
         prefixId = '#TYPO3Review_1447791881',
 
         /**
@@ -135,6 +126,7 @@ var TYPO3Review_1447791881 = (function () {
                 containerDiv.innerHTML = popupTemplate;
                 containerDiv.querySelector(prefixId + ' .closeButton').classList.remove('hide');
                 containerDiv.classList.add('normalMode');
+                containerDiv.classList.add('hide');
 
                 containerDiv.querySelector(prefixId + ' .throbber').style.backgroundImage = "url('" + chrome.extension.getURL('Resources/Images/throbber.svg') + "')";
 
@@ -586,8 +578,10 @@ var TYPO3Review_1447791881 = (function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickSuccess'));
+                    hideLoadingIndicator();
                 } else {
                     publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
+                    hideLoadingIndicator();
                 }
             }
         };
@@ -660,7 +654,6 @@ var TYPO3Review_1447791881 = (function () {
      */
     function openSite(site) {
         var url = 'http://' + site + '/typo3/';
-        console.log(url);
         if (chrome.tabs !== undefined) {
             chrome.tabs.query({
                 active: true,
@@ -806,7 +799,7 @@ var TYPO3Review_1447791881 = (function () {
                 if (parseInt(currentRevision._number, 10) === parseInt(revision, 10)) {
                     cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                     if (cherryPickCommand !== '') {
-                        document.getElementById(prefix + 'currentRevision').innerHTML = '<input class="' + prefix + 'revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
+                        document.querySelector(prefixId + ' .currentRevision').innerHTML = '<input class="revisionButton button" type="button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + revision + '">';
                     } else {
                         alert('doh! No cherry pick command found.');
                     }
@@ -818,14 +811,14 @@ var TYPO3Review_1447791881 = (function () {
                 if (parseInt(currentRevision._number, 10) !== parseInt(revision, 10)) {
                     cherryPickCommand = currentRevision.fetch['anonymous http'].commands['Cherry Pick'];
                     if (cherryPickCommand !== '') {
-                        allRevisionButtons += '<input type="button" class="' + prefix + 'revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '"><br/>';
+                        allRevisionButtons += '<input type="button" class="revisionButton button" name="revision" data-revision="' + currentRevision._number + '" value="Cherry-Pick revision ' + currentRevision._number + '"><br/>';
                     } else {
                         alert('doh! No cherry pick command found.');
                     }
                 }
             });
-            document.getElementById(prefix + 'allRevisions').innerHTML = allRevisionButtons;
-            allRevisions = document.getElementsByClassName(prefix + 'revisionButton');
+            document.querySelector(prefixId + ' .allRevisions').innerHTML = allRevisionButtons;
+            allRevisions = document.querySelectorAll(prefixId + ' .revisionButton');
             for (m = 0, n = allRevisions.length; m < n; ++m) {
                 allRevisions[m].addEventListener('click', function (event) {
                     revisions.forEach(function (currentRevision) {
@@ -837,9 +830,9 @@ var TYPO3Review_1447791881 = (function () {
                     });
                 }, false);
             }
-            document.getElementById(prefix + 'resetButton').addEventListener('click', resetReviewSites, false);
-            document.getElementById(prefix + 'updateButton').addEventListener('click', updateReviewSites, false);
-            document.getElementById(prefix + 'openReviewSitesButton').addEventListener('click', openReviewSites, false);
+            document.querySelector(prefixId + ' .resetButton').addEventListener('click', resetReviewSites(), false);
+            document.querySelector(prefixId + ' .updateButton').addEventListener('click', updateReviewSites(), false);
+            document.querySelector(prefixId + ' .openReviewSitesButton').addEventListener('click', openReviewSites(), false);
             hideLoadingIndicator();
         },
 
@@ -1326,7 +1319,6 @@ var TYPO3Review_1447791881 = (function () {
                 data.site = form.site.value;
                 data.repository = form.repository.value;
 
-                console.log(data);
                 Promise.resolve({status: 'OK'})
                     .then(function () {
                         if (form.resetRepository.checked === true) {
@@ -1359,6 +1351,7 @@ var TYPO3Review_1447791881 = (function () {
                     })
                     .catch(function (error) {
                         showCommandResult(error);
+                        hideLoadingIndicator();
                     });
             });
         },
@@ -1426,7 +1419,8 @@ var TYPO3Review_1447791881 = (function () {
             setTabUrl(url);
             publicMethods.detectApiVersion()
                 .then(function () {
-                    if (publicMethods.getApiVersion() === 0) {
+                    if (parseInt(publicMethods.getApiVersion(), 10) === 0) {
+                        showApiMarkup(apiVersion);
                         return publicMethods.getReviewSiteAvailability();
                     } else {
                         return {status: true};
@@ -1436,12 +1430,13 @@ var TYPO3Review_1447791881 = (function () {
                     if (url && result !== undefined) {
                         return publicMethods.loadIssueDetails(url);
                     } else {
-                        reject({});
+                        return Promise.reject({status: 'Error'});
                     }
                 })
                 .then(function (issueDetails) {
-                    if (publicMethods.getApiVersion() === 0) {
+                    if (parseInt(publicMethods.getApiVersion(), 10) === 0) {
                         publicMethods.createReviewButtons(issueDetails, revision);
+                        return Promise.reject({status: 'Error'});
                     } else {
                         return publicMethods.getTypo3Sites();
                     }
@@ -1451,6 +1446,8 @@ var TYPO3Review_1447791881 = (function () {
                         publicMethods.showChangeInformation();
                         publicMethods.createReviewSelector(revision);
                         return publicMethods.createSiteSelector(sites);
+                    } else {
+                        return Promise.resolve({status: 'OK'});
                     }
                 })
                 .then(function () {
@@ -1464,6 +1461,7 @@ var TYPO3Review_1447791881 = (function () {
                     publicMethods.listenForCherryPickCommand();
                 })
                 .catch(function () {
+                    hideLoadingIndicator();
                 });
         },
 
@@ -1542,10 +1540,14 @@ var TYPO3Review_1447791881 = (function () {
                 };
             executeGitStatus(data)
                 .then(function (result) {
-                    if (result.status === 'OK') {
+                    if (result.status === 'OK' && result.stdout[0].sha1 !== undefined) {
                         document.querySelector(prefixId + ' .repositoryInformation .sha1').innerHTML = result.stdout[0].sha1;
                         document.querySelector(prefixId + ' .repositoryInformation .subject').innerHTML = result.stdout[0].subject;
                         document.querySelector(prefixId + ' .repositoryInformation .subject').setAttribute('title', result.stdout[0].subject);
+                    } else {
+                        document.querySelector(prefixId + ' .repositoryInformation .sha1').innerHTML = '';
+                        document.querySelector(prefixId + ' .repositoryInformation .subject').innerHTML = '';
+                        document.querySelector(prefixId + ' .repositoryInformation .subject').setAttribute('title', '');
                     }
                 });
         },
