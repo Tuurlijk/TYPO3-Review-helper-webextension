@@ -197,7 +197,7 @@ var TYPO3Review_1447791881 = (function () {
         return new Promise(function (resolve, reject) {
             var xhr = new XMLHttpRequest(),
                 response;
-            xhr.open('GET', apiEnd + '/git/reset/' + data.site + '/' + data.repository, true);
+            xhr.open('GET', apiEnd + '/git/reset/' + data.site + '/' + data.repository + '/' + data.branch, true);
             xhr.onload = function () {
                 response = JSON.parse(xhr.response);
                 if (response.status === 'OK') {
@@ -771,6 +771,34 @@ var TYPO3Review_1447791881 = (function () {
     var publicMethods = {
 
         /**
+         * Create branch selector
+         *
+         * @since 1.0.0
+         *
+         * @param items
+         */
+        createBranchSelector: function (items) {
+            if (items.length === 0) {
+                items[0] = 'No branches found';
+            }
+
+            showLoadingIndicator();
+            var select = '<select name="branch">';
+            items.forEach(function (item) {
+                select += '<option value="' + item.trimLeft() + '">' + item.trimLeft() + '</option>';
+            });
+            select += '</select><br/>';
+
+            document.querySelector(prefixId + ' .branchSelector').innerHTML = select;
+            document.querySelector(prefixId + ' .branchSelector select').addEventListener('change', function () {
+                publicMethods.setUserDefault('branch', this.value);
+            });
+            document.querySelector(prefixId + ' .branchSelector select').value = publicMethods.getUserDefault('branch');
+
+            hideLoadingIndicator();
+        },
+
+        /**
          * Create review buttons
          *
          * @since 1.0.0
@@ -1066,6 +1094,44 @@ var TYPO3Review_1447791881 = (function () {
         },
 
         /**
+         * Get Git branches
+         *
+         * @param site
+         * @param repository
+         *
+         * @since 1.0.0
+         */
+        getGitBranches: function (site, repository) {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest(),
+                    response;
+                xhr.open('GET', apiEnd + '/git/branch/' + site + '/' + repository, true);
+                xhr.onload = function () {
+                    response = JSON.parse(xhr.response);
+                    if (response.status === 'OK') {
+                        if (response.stdout === undefined) {
+                            resolve([]);
+                        } else {
+                            resolve(response.stdout);
+                        }
+                    } else {
+                        reject({
+                            status: response.status,
+                            statusText: response.stderr
+                        });
+                    }
+                };
+                xhr.onerror = function () {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                };
+                xhr.send();
+            });
+        },
+
+        /**
          * Get Git repositories
          *
          * @param site
@@ -1250,6 +1316,7 @@ var TYPO3Review_1447791881 = (function () {
          */
         getUserDefault: function (name) {
             var userDefaults = {
+                branch: 'origin/master',
                 openSite: true,
                 repository: 'typo3_src',
                 pullRepository: true,
@@ -1269,6 +1336,7 @@ var TYPO3Review_1447791881 = (function () {
          */
         getUserDefaults: function () {
             var userDefaults = {
+                branch: 'origin/master',
                 openSite: true,
                 repository: 'typo3_src',
                 pullRepository: true,
@@ -1314,6 +1382,7 @@ var TYPO3Review_1447791881 = (function () {
                     fetchUrl = issueDetails.fromRef.repository.cloneUrl;
                 }
 
+                data.branch = form.branch.value;
                 data.change = change;
                 data.fetchUrl = fetchUrl;
                 data.site = form.site.value;
@@ -1455,6 +1524,12 @@ var TYPO3Review_1447791881 = (function () {
                 })
                 .then(function (gitRepositories) {
                     publicMethods.createRepositorySelector(gitRepositories);
+                })
+                .then(function () {
+                    return publicMethods.getGitBranches(publicMethods.getUserDefault('site'), publicMethods.getUserDefault('repository'));
+                })
+                .then(function (gitBranches) {
+                    publicMethods.createBranchSelector(gitBranches);
                     publicMethods.showRepositoryInformation();
                     publicMethods.setFormDefaults();
                     publicMethods.listenForFormChanges();
@@ -1486,6 +1561,7 @@ var TYPO3Review_1447791881 = (function () {
          */
         setUserDefault: function (name, value) {
             var userDefaults = {
+                branch: 'origin/master',
                 openSite: true,
                 repository: 'typo3_src',
                 pullRepository: true,
