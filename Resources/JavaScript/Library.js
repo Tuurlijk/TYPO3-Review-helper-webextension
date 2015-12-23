@@ -1513,7 +1513,7 @@ var TYPO3Review_1447791881 = (function () {
                 document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.subject;
                 document.querySelector(prefixId + ' .changeInformation .project').innerText = change.project;
                 document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.branch;
-                document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">' + change.mergeable + '</span>' : '<span class="status4xx">' + change.mergeable + '</span>';
+                document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">' + change.mergeable + '</span>' : '<span class="status4xx">' + change.status + '</span>';
                 document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
                 document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
             }

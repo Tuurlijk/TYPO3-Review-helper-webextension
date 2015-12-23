@@ -9,8 +9,7 @@
   "permissions": [
     "tabs",
     "webRequest",
-    "*://*.typo3.org/*",
-    "*://*.maxserv.com/*"
+    "*://*.typo3.org/*"
   ],
   "background": {
     "scripts": [
