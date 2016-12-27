@@ -2,16 +2,21 @@
  latedef:true, noarg:true, noempty:true, nonew:true, undef:true, maxlen:256,
  strict:true, trailing:true, boss:true, browser:true, devel:true, jquery:true */
 /*jslint plusplus:true, nomen:true, browser:true*/
-/*global chrome, console, alert, isValidUrl, TYPO3Review_1447791881 */
+/*global browser, chrome, console, alert, isValidUrl, TYPO3Review_1447791881 */
+
+'use strict';
+
+if (typeof browser === 'undefined') {
+    var browser = chrome;
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-    'use strict';
     var t3Review = TYPO3Review_1447791881;
 
-    document.querySelector('#TYPO3Review_1447791881 .extensionName').innerText = chrome.i18n.getMessage('extensionName');
+    document.querySelector('#TYPO3Review_1447791881 .extensionName').innerText = browser.i18n.getMessage('extensionName');
 
     // Query for the active tab...
-    chrome.tabs.query({
+    browser.tabs.query({
         active: true,
         currentWindow: true
     }, function (tabs) {

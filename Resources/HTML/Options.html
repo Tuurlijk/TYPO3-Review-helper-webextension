@@ -1,51 +1,45 @@
 <html>
 <head>
-	<title i18n-content="optionsPageTitle">TYPO3 Review Options</title>
-	<meta charset="utf-8">
-	<link rel="stylesheet" href="/Resources/CSS/chrome_shared.css"/>
-	<link rel="stylesheet" href="/Resources/CSS/uber_frame.css"/>
-	<link rel="stylesheet" href="/Resources/CSS/Options.css"/>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/Resources/CSS/common.css"/>
+    <link rel="stylesheet" href="/Resources/CSS/extensions.css"/>
+    <link rel="stylesheet" href="/Resources/CSS/Options.css"/>
 </head>
-<body class="uber-frame" style="font-family: 'Lucida Grande', sans-serif; font-size: 75%;">
+<body>
 <div id="navigation">
-	<h1 i18n-content="extensionName">TYPO3 Review</h1>
-	<ul>
-		<li>
-			<a href="Options.html" class="active"><span i18n-content="optionsDisplayName">Options</span></a>
-		</li>
-		<li>
-			<a href="About.html"><span i18n-content="aboutDisplayName">About</span></a>
-		</li>
-	</ul>
+    <ul>
+        <li>
+            <a href="Options.html" class="active"><span i18n-content="optionsDisplayName">Options</span></a>
+        </li>
+        <li>
+            <a href="About.html"><span i18n-content="aboutDisplayName">About</span></a>
+        </li>
+    </ul>
 </div>
 <div class="page">
-	<header>
-		<h1 i18n-content="optionsTitle">Options</h1>
-	</header>
-	<section>
-		<p>
-			Review a TYPO3 patch by clicking the TYPO3 icon in the addressbar:
-			<img class="inlineicon" alt="" src="/Resources/Icons/ToolbarIcon19.png"/>
-		</p>
-
-		<h3>TYPO3 Forger server URL</h3>
-
-		<p class="note">Specify your TYPO3 Forger server URL here.</p>
-
-		<p>
-			<input type="text" id="forgerUrl" placeholder="https://forger.typo3.org/" size="20"/>
-		</p>
-
-		<h3>TYPO3 Review server (Gerrit) URL</h3>
-
-		<p class="note">Specify your TYPO3 Review server URL here.</p>
-
-		<p>
-			<input type="text" id="gerritUrl" placeholder="https://review.typo3.org/" size="20"/>
-		</p>
-	</section>
+    <section>
+        <p>Review a TYPO3 patch by clicking the TYPO3 icon in the addressbar: <img class="inlineicon" alt="" src="/Resources/Icons/ToolbarIcon19.png"/></p>
+        <div class="detail-row">
+            <div class="option-description">
+                <label class="preferences-label" for="forgerUrl">TYPO3 Forger server URL</label>
+                <p class="detail-row-label preferences-description">Specify your TYPO3 Forger server URL here.</p>
+            </div>
+            <div class="option-value">
+                <input type="text" id="forgerUrl" size="40" placeholder="https://forger.typo3.org/"/>
+            </div>
+        </div>
+        <div class="detail-row">
+            <div class="option-description">
+                <label class="preferences-label" for="gerritUrl">TYPO3 Review server (Gerrit) URL</label>
+                <p class="detail-row-label preferences-description">Specify your TYPO3 Review server URL here.</p>
+            </div>
+            <div class="option-value">
+                <input type="text" id="gerritUrl" size="40" placeholder="https://review.typo3.org/"/>
+            </div>
+        </div>
+    </section>
 </div>
-<script type="text/javascript" src="/Resources/JavaScript/jquery-2.0.0.min.js"></script>
+<script type="text/javascript" src="/Resources/JavaScript/OptionsContextProvider.js"></script>
 <script type="text/javascript" src="/Resources/JavaScript/Options.js"></script>
 </body>
 </html>

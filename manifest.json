@@ -1,10 +1,11 @@
 {
   "name": "__MSG_extensionName__",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "manifest_version": 2,
   "minimum_chrome_version": "22",
   "description": "__MSG_extensionDescription__",
-  "homepage_url": "http://www.donationbasedhosting.org/",
+  "author": "ℳichiel ℛoos",
+  "homepage_url": "http://www.michielroos.com/",
   "default_locale": "en",
   "permissions": [
     "tabs",
@@ -42,7 +43,10 @@
     "48": "Resources/Icons/Icon48.png",
     "128": "Resources/Icons/Icon128.png"
   },
-  "options_page": "Resources/HTML/Options.html",
+  "options_ui": {
+    "page": "Resources/HTML/Options.html",
+    "open_in_tab": false
+  },
   "web_accessible_resources": [
     "Resources/HTML/Popup.html",
     "Resources/Images/throbber.svg"

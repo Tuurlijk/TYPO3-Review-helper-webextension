@@ -2,10 +2,15 @@
  latedef:true, noarg:true, noempty:true, nonew:true, undef:true, maxlen:256,
  strict:true, trailing:true, boss:true, browser:true, devel:true, jquery:true */
 /*jslint plusplus:true, nomen:true, browser:true*/
-/*global chrome, openTab, DS, console, alert, localStorage */
+/*global browser, chrome, console, alert, isValidUrl */
+
+'use strict';
+
+if (typeof browser === 'undefined') {
+    var browser = chrome;
+}
 
 var TYPO3Review_1447791881 = (function () {
-    'use strict';
 
     /**
      * The id of the active tab
@@ -128,7 +133,7 @@ var TYPO3Review_1447791881 = (function () {
                 containerDiv.classList.add('normalMode');
                 containerDiv.classList.add('hide');
 
-                containerDiv.querySelector(prefixId + ' .throbber').style.backgroundImage = "url('" + chrome.extension.getURL('Resources/Images/throbber.svg') + "')";
+                containerDiv.querySelector(prefixId + ' .throbber').style.backgroundImage = "url('" + browser.extension.getURL('Resources/Images/throbber.svg') + "')";
 
                 if (document.getElementsByTagName('body')[0]) {
                     document.getElementsByTagName('body')[0].appendChild(containerDiv);
@@ -343,7 +348,7 @@ var TYPO3Review_1447791881 = (function () {
     function fetchPopupTemplate() {
         return new Promise(function (resolve, reject) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', chrome.extension.getURL('Resources/HTML/Popup.html'), true);
+            xhr.open('GET', browser.extension.getURL('Resources/HTML/Popup.html'), true);
             xhr.onload = function () {
                 resolve(xhr.response);
             };
@@ -577,10 +582,10 @@ var TYPO3Review_1447791881 = (function () {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickSuccess'));
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('cherryPickSuccess'));
                     hideLoadingIndicator();
                 } else {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('cherryPickFaill'), 'error');
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('cherryPickFaill'), 'error');
                     hideLoadingIndicator();
                 }
             }
@@ -617,13 +622,13 @@ var TYPO3Review_1447791881 = (function () {
                 "http://review.local.typo3.org/typo3/"
             ],
             count;
-        if (chrome.tabs !== undefined) {
-            chrome.tabs.query({
+        if (browser.tabs !== undefined) {
+            browser.tabs.query({
                 active: true,
                 currentWindow: true
             }, function (tabs) {
                 for (count = 0; count < urls.length; count++) {
-                    chrome.tabs.create({
+                    browser.tabs.create({
                         'url': urls[count],
                         'index': tabs[0].index + 1,
                         'active': false
@@ -634,7 +639,7 @@ var TYPO3Review_1447791881 = (function () {
 
         if (activeTabId !== undefined) {
             for (count = 0; count < urls.length; count++) {
-                chrome.runtime.sendMessage({
+                browser.runtime.sendMessage({
                     from: 'library',
                     cmd: 'openTab',
                     url: urls[count],
@@ -654,12 +659,12 @@ var TYPO3Review_1447791881 = (function () {
      */
     function openSite(site) {
         var url = 'http://' + site + '/typo3/';
-        if (chrome.tabs !== undefined) {
-            chrome.tabs.query({
+        if (browser.tabs !== undefined) {
+            browser.tabs.query({
                 active: true,
                 currentWindow: true
             }, function (tabs) {
-                chrome.tabs.create({
+                browser.tabs.create({
                     'url': url,
                     'index': tabs[0].index + 1,
                     'active': false
@@ -668,7 +673,7 @@ var TYPO3Review_1447791881 = (function () {
         }
 
         if (activeTabId !== undefined) {
-            chrome.runtime.sendMessage({
+            browser.runtime.sendMessage({
                 from: 'library',
                 cmd: 'openTab',
                 url: url,
@@ -693,9 +698,9 @@ var TYPO3Review_1447791881 = (function () {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('resetSitesSuccess'));
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('resetSitesSuccess'));
                 } else {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('resetSitesFail'), 'error');
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('resetSitesFail'), 'error');
                 }
             }
         };
@@ -759,9 +764,9 @@ var TYPO3Review_1447791881 = (function () {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('updateSitesSuccess'));
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('updateSitesSuccess'));
                 } else {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('updateSitesFail'), 'error');
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('updateSitesFail'), 'error');
                 }
             }
         };
@@ -1001,7 +1006,7 @@ var TYPO3Review_1447791881 = (function () {
                         }
                     }
                     else {
-                        publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+                        publicMethods.addStatusMessage(browser.i18n.getMessage('apiVersionFetchFail'), 'error');
                         resolve({
                             status: this.status,
                             statusText: xhr.statusText
@@ -1016,7 +1021,7 @@ var TYPO3Review_1447791881 = (function () {
                 };
                 xhr.timeout = 2000;
                 xhr.ontimeout = function () {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('apiVersionFetchFail'), 'error');
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('apiVersionFetchFail'), 'error');
                     resolve({
                         status: this.status,
                         statusText: xhr.statusText
@@ -1088,7 +1093,7 @@ var TYPO3Review_1447791881 = (function () {
             }
 
             if (detailUrl === '') {
-                publicMethods.addStatusMessage(chrome.i18n.getMessage('changeIdNotFound'), 'error');
+                publicMethods.addStatusMessage(browser.i18n.getMessage('changeIdNotFound'), 'error');
             }
             return detailUrl;
         },
@@ -1245,7 +1250,7 @@ var TYPO3Review_1447791881 = (function () {
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 0 || xhr.status === 400 || xhr.status === 404) {
-                            publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                            publicMethods.addStatusMessage(browser.i18n.getMessage('reviewSiteUnavailable'), 'error');
                             reject({
                                 status: this.status,
                                 statusText: xhr.statusText
@@ -1266,7 +1271,7 @@ var TYPO3Review_1447791881 = (function () {
                 };
                 xhr.timeout = 2000;
                 xhr.ontimeout = function () {
-                    publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                    publicMethods.addStatusMessage(browser.i18n.getMessage('reviewSiteUnavailable'), 'error');
                     reject({
                         status: this.status,
                         statusText: xhr.statusText
@@ -1470,7 +1475,7 @@ var TYPO3Review_1447791881 = (function () {
                                 status: this.status,
                                 statusText: xhr.statusText
                             });
-                            publicMethods.addStatusMessage(chrome.i18n.getMessage('issueDetailLoadFail'), 'error');
+                            publicMethods.addStatusMessage(browser.i18n.getMessage('issueDetailLoadFail'), 'error');
                         }
                     }
                 };
@@ -1589,7 +1594,7 @@ var TYPO3Review_1447791881 = (function () {
                 document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.subject;
                 document.querySelector(prefixId + ' .changeInformation .project').innerText = change.project;
                 document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.branch;
-                document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">' + change.mergeable + '</span>' : '<span class="status4xx">' + change.status + '</span>';
+                document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">Yes</span>' : '<span class="status4xx">Can Not Merge' + (change.status !== 'NEW' ? ': ' + change.status : '') + '</span>';
                 document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
                 document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
             }
@@ -1676,10 +1681,10 @@ var TYPO3Review_1447791881 = (function () {
                 }
                 break;
             case 'certificateFailure':
-                publicMethods.addStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error');
+                publicMethods.addStatusMessage(browser.i18n.getMessage('certificateFailure'), 'error');
                 break;
             case 'reviewSiteUnavailable':
-                publicMethods.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error');
+                publicMethods.addStatusMessage(browser.i18n.getMessage('reviewSiteUnavailable'), 'error');
                 break;
             }
             sendResponse({});

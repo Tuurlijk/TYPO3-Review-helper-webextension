@@ -1,16 +1,20 @@
 /*jshint bitwise:true, curly:true, eqeqeq:true, forin:true, globalstrict: true,
  latedef:true, noarg:true, noempty:true, nonew:true, undef:true, maxlen:256,
  strict:true, trailing:true, boss:true, browser:true, devel:true, jquery:true */
-/*global chrome, document, localStorage, safari, SAFARI, openTab, DS, localize,
- console, TYPO3Review_1447791881 */
+/*global browser, chrome, console, alert, isValidUrl, TYPO3Review_1447791881 */
+
+'use strict';
+
+if (typeof browser === 'undefined') {
+    var browser = chrome;
+}
 
 /**
  * Listen for changes to tabs
  *
  * @since 1.0.0
  */
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    'use strict';
+browser.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
     /**
      * Update the addressbar icon
@@ -31,13 +35,13 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
 
         // Update title
-        chrome.pageAction.setTitle({
+        browser.pageAction.setTitle({
             tabId: tabId,
             title: title
         });
 
         // Update image
-        chrome.pageAction.setIcon({
+        browser.pageAction.setIcon({
             tabId: tabId,
             path: {
                 '19': '/Resources/Icons/' + image + '19.png',
@@ -80,18 +84,15 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         parser = document.createElement('a');
         parser.href = tab.url;
         if (parser.pathname.startsWith('/gerrit/')) {
-            chrome.tabs.insertCSS(tab.id, {
+            browser.tabs.insertCSS(tab.id, {
                 file: '/Resources/CSS/ContentLight.css'
             });
 
-            chrome.tabs.sendMessage(
+            browser.tabs.sendMessage(
                 tab.id,
                 {
                     cmd: 'addButtons',
                     gerritUrl: gerritUrl
-                },
-                function () {
-                    //console.log(response);
                 }
             );
         }
@@ -100,7 +101,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     // Show icon if we are on a gerritUrl
     if (tab.url.startsWith(gerritUrl)) {
         // Show the pageAction
-        chrome.pageAction.show(tabId);
+        browser.pageAction.show(tabId);
 
         parser = document.createElement('a');
         parser.href = tab.url;
@@ -124,7 +125,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     // Show icon if we are on a stashUrl
     if (tab.url.startsWith(stashUrl)) {
         // Show the pageAction
-        chrome.pageAction.show(tabId);
+        browser.pageAction.show(tabId);
 
         parser = document.createElement('a');
         parser.href = tab.url;
@@ -157,44 +158,39 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
  *
  * @since 1.0.0
  */
-chrome.webRequest.onErrorOccurred.addListener(function (details) {
+browser.webRequest.onErrorOccurred.addListener(function(details) {
     'use strict';
-    var i, views;
+    var i,
+        views;
     if (details.error === 'net::ERR_INSECURE_RESPONSE') {
         if (details.tabId > 0) {
-            chrome.tabs.sendMessage(
+            browser.tabs.sendMessage(
                 details.tabId,
                 {
                     cmd: 'certificateFailure',
                     details: details
-                },
-                function () {
-                    //console.log(response);
                 }
             );
         } else {
-            views = chrome.extension.getViews({type: 'popup'});
+            views = browser.extension.getViews({type: 'popup'});
             for (i = 0; i < views.length; i = i + 1) {
-                TYPO3Review_1447791881.addStatusMessage(chrome.i18n.getMessage('certificateFailure'), 'error', views[i].document);
+                TYPO3Review_1447791881.addStatusMessage(browser.i18n.getMessage('certificateFailure'), 'error', views[i].document);
             }
         }
     }
     if (details.error === 'net::ERR_ADDRESS_UNREACHABLE') {
         if (details.tabId > 0) {
-            chrome.tabs.sendMessage(
+            browser.tabs.sendMessage(
                 details.tabId,
                 {
                     cmd: 'reviewSiteUnavailable',
                     details: details
-                },
-                function () {
-                    //console.log(response);
                 }
             );
         } else {
-            views = chrome.extension.getViews({type: 'popup'});
+            views = browser.extension.getViews({type: 'popup'});
             for (i = 0; i < views.length; i = i + 1) {
-                TYPO3Review_1447791881.addStatusMessage(chrome.i18n.getMessage('reviewSiteUnavailable'), 'error', views[i].document);
+                TYPO3Review_1447791881.addStatusMessage(browser.i18n.getMessage('reviewSiteUnavailable'), 'error', views[i].document);
             }
         }
     }
@@ -213,27 +209,27 @@ chrome.webRequest.onErrorOccurred.addListener(function (details) {
  * @param sender
  * @param sendResponse
  */
-chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
+browser.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
         'use strict';
         var response;
         switch (request.cmd) {
-        case 'getActiveTabId':
-            if (request.from === 'content') {
-                sendResponse(sender.tab.index);
-            }
-            break;
-        case 'openTab':
-            if (request.from === 'library') {
-                chrome.tabs.create({
-                    'url': request.url,
-                    'index': request.index,
-                    'active': false
-                });
-                response = 'ok';
-                sendResponse(response);
-            }
-            break;
+            case 'getActiveTabId':
+                if (request.from === 'content') {
+                    sendResponse(sender.tab.index);
+                }
+                break;
+            case 'openTab':
+                if (request.from === 'library') {
+                    browser.tabs.create({
+                        'url': request.url,
+                        'index': request.index,
+                        'active': false
+                    });
+                    response = 'ok';
+                    sendResponse(response);
+                }
+                break;
         }
     }
 );
