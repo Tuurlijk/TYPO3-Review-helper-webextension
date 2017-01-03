@@ -13,7 +13,7 @@ if (typeof browser === 'undefined') {
 document.addEventListener('DOMContentLoaded', function () {
     var t3Review = TYPO3Review_1447791881;
 
-    document.querySelector('#TYPO3Review_1447791881 .extensionName').innerText = browser.i18n.getMessage('extensionName');
+    document.querySelector('#TYPO3Review_1447791881 .extensionName').textContent = browser.i18n.getMessage('extensionName');
 
     // Query for the active tab...
     browser.tabs.query({

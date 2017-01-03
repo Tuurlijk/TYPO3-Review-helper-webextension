@@ -1591,19 +1591,19 @@ var TYPO3Review_1447791881 = (function () {
             var change = publicMethods.getIssueDetails();
             if (getTabUrl().startsWith(getGerritUrl())) {
                 change = change[0];
-                document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.subject;
-                document.querySelector(prefixId + ' .changeInformation .project').innerText = change.project;
-                document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.branch;
+                document.querySelector(prefixId + ' .changeInformation .subject').textContent = change.subject;
+                document.querySelector(prefixId + ' .changeInformation .project').textContent = change.project;
+                document.querySelector(prefixId + ' .changeInformation .branch').textContent = change.branch;
                 document.querySelector(prefixId + ' .changeInformation .canMerge').innerHTML = change.mergeable ? '<span class="status2xx">Yes</span>' : '<span class="status4xx">Can Not Merge' + (change.status !== 'NEW' ? ': ' + change.status : '') + '</span>';
-                document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.change_id;
-                document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.current_revision;
+                document.querySelector(prefixId + ' .changeInformation .change-id').textContent = change.change_id;
+                document.querySelector(prefixId + ' .changeInformation .commit').textContent = change.current_revision;
             }
             if (getTabUrl().startsWith(getStashUrl())) {
-                document.querySelector(prefixId + ' .changeInformation .subject').innerText = change.title;
-                document.querySelector(prefixId + ' .changeInformation .project').innerText = change.fromRef.repository.name;
-                document.querySelector(prefixId + ' .changeInformation .branch').innerText = change.fromRef.displayId;
-                document.querySelector(prefixId + ' .changeInformation .change-id').innerText = change.fromRef.latestChangeset;
-                document.querySelector(prefixId + ' .changeInformation .commit').innerText = change.fromRef.latestCommit;
+                document.querySelector(prefixId + ' .changeInformation .subject').textContent = change.title;
+                document.querySelector(prefixId + ' .changeInformation .project').textContent = change.fromRef.repository.name;
+                document.querySelector(prefixId + ' .changeInformation .branch').textContent = change.fromRef.displayId;
+                document.querySelector(prefixId + ' .changeInformation .change-id').textContent = change.fromRef.latestChangeset;
+                document.querySelector(prefixId + ' .changeInformation .commit').textContent = change.fromRef.latestCommit;
             }
         },
 
@@ -1663,7 +1663,7 @@ var TYPO3Review_1447791881 = (function () {
                         clone = links[m].cloneNode(true);
                         externalLinkIcon = clone.getElementsByTagName('i')[0];
                         button = clone.getElementsByTagName('span')[0];
-                        button.innerText = '';
+                        button.textContent = '';
                         button.appendChild(externalLinkIcon);
                         reviewTextNode = document.createTextNode(' Review');
                         button.appendChild(reviewTextNode);
@@ -1726,7 +1726,7 @@ var TYPO3Review_1447791881 = (function () {
             messageDiv.classList.add(timestamp, 'message', 'fadeIn', 'status' + status);
 
             closeButton.classList.add('closeButton');
-            closeButton.innerText = '✖';
+            closeButton.textContent = '✖';
             messageDiv.appendChild(closeButton);
 
             if (theDocument.querySelector(prefixId + ' .status').firstChild) {
